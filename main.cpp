@@ -1,20 +1,29 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2019 ARM Limited
- * SPDX-License-Identifier: Apache-2.0
- */
-
+#include "EthernetNetIf.h"
+#include "NTPClient.h"
 #include "mbed.h"
 
-#define WAIT_TIME_MS 500 
-DigitalOut led1(LED1);
+EthernetNetIf eth; 
+NTPClient ntp;
 
-int main()
-{
-    printf("This is the bare metal blinky example running on Mbed OS %d.%d.%d.\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
+// main() runs in its own thread in the OS
+int main() {
+  printf("Start\n");
 
-    while (true)
-    {
-        led1 = !led1;
-        thread_sleep_for(WAIT_TIME_MS);
-    }
+  printf("Setting up...\n");
+  EthernetErr ethErr = eth.setup();
+  if (ethErr) {
+    printf("Error %d in setup.\n", ethErr);
+    return -1;
+  }
+  printf("Setup OK\r\n");
+
+  time_t ctTime;
+  ctTime = time(NULL);
+  printf("Current time is (UTC): %s\n", ctime(&ctTime));
+
+  Host server(IpAddr(), 123, "0.uk.pool.ntp.org");
+  ntp.setTime(server);
+
+  ctTime = time(NULL);
+  printf("\nTime is now (UTC): %s\n", ctime(&ctTime));
 }
