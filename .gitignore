@@ -1,3 +1,7 @@
 BUILD/*
 .DS_Store
 mbed-os
+BUILD
+.mbed
+wifi-ism43362
+ntp-client
