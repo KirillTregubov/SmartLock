@@ -26,8 +26,9 @@ ISM43362Interface wifi(false);
 #endif
 
 #include "psa/crypto.h"
+#include "mbedtls/version.h" // unsure if needed
 #include "ntp-client/NTPClient.h"
- 
+
 const char *sec2str(nsapi_security_t sec)
 {
     switch (sec) {
@@ -72,15 +73,25 @@ int scan_demo(WiFiInterface *wifi)
     return count;
 }
 
+void set_rtc() {
+    NTPClient ntp(&wifi);
+    // default server: 2.pool.ntp.org and default port: 123
+    time_t timestamp = ntp.get_timestamp();
+    if (timestamp < 0) {
+        printf("An error occurred when getting the time. (code %u)\n", timestamp);
+    } else {
+        printf("Set RTC clock to %s\n", ctime(&timestamp));
+        set_time(timestamp);
+    }
+}
+
 static void generate_private_key(void)
 {
-    psa_status_t status;
     uint8_t random[20] = { 0 };
 
-    printf("Generate random...\t");
-    fflush(stdout);
+    printf("Generating random...\n");
 
-    /* Initialize PSA Crypto */
+    psa_status_t status;
     status = psa_crypto_init();
     if (status != PSA_SUCCESS) {
         printf("Failed to initialize PSA Crypto\n");
@@ -93,19 +104,17 @@ static void generate_private_key(void)
         return;
     }
 
-    printf("Generated random data\n");
+    printf("Generated %s\n", random);
 
     /* Clean up */
     mbedtls_psa_crypto_free();
 }
- 
+
 int main()
 {
-    int count = 0;
- 
-    printf("WiFi example\n\n");
- 
-    count = scan_demo(&wifi);
+    generate_private_key();
+    
+    int count = scan_demo(&wifi);
     if (count == 0) {
         printf("No WIFI APNs found - can't continue further.\n");
         return -1;
@@ -125,15 +134,7 @@ int main()
     printf("Gateway: %s\n", wifi.get_gateway());
     printf("RSSI: %d\n\n", wifi.get_rssi());
 
-    NTPClient ntp(&wifi);
-    // default server: 2.pool.ntp.org and default port: 123
-    time_t timestamp = ntp.get_timestamp();
-    if (timestamp < 0) {
-        printf("An error occurred when getting the time. (code %u)\n", timestamp);
-    } else {
-        printf("Set RTC clock to %s\n", ctime(&timestamp));
-        set_time(timestamp);
-    }
+    set_rtc();
  
     wifi.disconnect();
     printf("\nTerminated\n");
