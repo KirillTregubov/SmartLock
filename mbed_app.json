@@ -1,0 +1,68 @@
+{
+    "config": {
+        "wifi-shield": {
+            "help": "Options are internal, WIFI_IDW0XX1",
+            "value": "internal"
+        },
+        "wifi-ssid": {
+            "help": "WiFi SSID",
+            "value": "\"SSID\""
+        },
+        "wifi-password": {
+            "help": "WiFi Password",
+            "value": "\"PASSWORD\""
+        },
+        "wifi-tx": {
+            "help": "TX pin for serial connection to external device",
+            "value": "D1"
+        },
+        "wifi-rx": {
+            "help": "RX pin for serial connection to external device",
+            "value": "D0"
+        },
+        "wifi-spi_miso": {
+            "help": "SPI-MISO connection to external device",
+            "value": "PC_11"
+        },
+        "wifi-spi_mosi": {
+            "help": "SPI-MOSI connection to external device",
+            "value": "PC_12"
+        },
+        "wifi-spi_sclk": {
+            "help": "SPI-CLOCK connection to external device",
+            "value": "PC_10"
+        },
+        "wifi-spi_nss": {
+            "help": "SPI chip select of external device",
+            "value": "PE_0"
+        },
+        "wifi-reset": {
+            "help": "WIFI module reset pin",
+            "value": "PE_8"
+        },
+        "wifi-dataready": {
+            "help": "WIFI module data ready pin",
+            "value": "PE_1"
+        },
+        "wifi-wakeup": {
+            "help": "WIFI module wakeup pin",
+            "value": "PB_12"
+        }
+    },
+    "target_overrides": {
+        "*": {
+            "platform.stdio-convert-newlines": true,
+            "target.features_add" : ["EXPERIMENTAL_API", "PSA"],
+            "target.extra_labels_add": ["MBED_PSA_SRV"]
+        },
+        "DISCO_L475VG_IOT1A": {
+            "wifi-spi_miso": "PC_11",
+            "wifi-spi_mosi": "PC_12",
+            "wifi-spi_sclk": "PC_10",
+            "wifi-spi_nss": "PE_0",
+            "wifi-reset": "PE_8",
+            "wifi-dataready": "PE_1",
+            "wifi-wakeup": "PB_12"
+        }
+    }
+}
