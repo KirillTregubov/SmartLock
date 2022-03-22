@@ -1,5 +1,20 @@
 {
     "config": {
+        "estimated-application-size": {
+            "required": true
+        },
+        "protagonist-download": {
+            "required": true
+        },
+        "protagonist-file": {
+            "required": true
+        },
+        "protagonist-flash": {
+            "required": true
+        },
+        "protagonist-file-to-flash": {
+            "required": true
+        },
         "wifi-shield": {
             "help": "Options are internal, WIFI_IDW0XX1",
             "value": "internal"
