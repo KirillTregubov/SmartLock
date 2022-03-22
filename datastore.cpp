@@ -3,9 +3,7 @@
 
 #include "mbed.h"
 
-#include "features/storage/filesystem/FileSystem.h"
-#include "features/storage/filesystem/fat/FATFileSystem.h"
-#include "features/storage/filesystem/littlefs/LittleFileSystem.h"
+#include "mbed-os/storage/filesystem/littlefs/include/littlefs/LittleFileSystem.h"
 #include "unity/unity.h"
 
 #define MAX_BLOCKDEVICE_SIZE (32*1024*1024)
