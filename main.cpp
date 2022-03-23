@@ -3,6 +3,7 @@
  * @author Kirill Tregubov (KirillTregubov)
  * @author Philip Cai (Gadnalf)
  * @copyright Copyright (c) 2022 Kirill Tregubov & Philip Cai
+ *
  * @brief Main SmartLock program.
  *
  * This generates the private key, syncs the RTC with an NTP
@@ -12,8 +13,8 @@
  */
 
 #include "mbed.h"
-#include "ntp-client/NTPClient.h"
-#include <ctype.h>
+#include "smartlock.hpp"
+// IN CASE SOMETHING BREAKS \/
 // #include "TCPSocket.h"
 // #include <time.h>
 // #include "mbedtls/version.h"
@@ -23,55 +24,6 @@
 #include "ISM43362Interface.h"
 ISM43362Interface wifi(false);
 #endif
-
-/**
- * @brief Synchronizes the RTC to a hardcoded epoch.
- *
- * @return Void.
- */
-void sync_rtc_with_factory() {
-  set_time(1648016868);
-  time_t factory_time = time(NULL);
-  printf("> Defaulted RTC to %s.", ctime(&factory_time));
-}
-
-/**
- * @brief Synchronizes the RTC to the epoch returned by
- *        the default NTP server.
- *
- * The default NTP server is 2.pool.ntp.org port 123.
- *
- * @return Void.
- */
-void sync_rtc_with_ntp() {
-  NTPClient ntp(&wifi);
-  time_t timestamp = ntp.get_timestamp();
-  if (timestamp < 0) {
-    printf("An error occurred when getting the time. (code %u)\n", timestamp);
-    sync_rtc_with_factory();
-  } else {
-    printf("> Synced RTC to %s", ctime(&timestamp));
-    set_time(timestamp);
-  }
-}
-
-/**
- * @brief Convert a string to uppercase.
- *
- * @param str The string that you want to convert to uppercase.
- * @return The address of the string.
- */
-char *strupr(char *str) {
-  unsigned char *temp = (unsigned char *)str;
-
-  // Convert to upper case
-  while (*temp) {
-    *temp = toupper((unsigned char)*temp);
-    temp++;
-  }
-
-  return str;
-}
 
 /**
  * @brief Generate a private key using onboard TRNG chip.
@@ -123,45 +75,18 @@ char *generate_private_key() {
   return strupr(key);
 }
 
-/**
- * @brief Connect to the WiFi network specified in 'mbed_app.json'.
- *
- * @return 0 upon success, -1 on error / failure.
- */
-int connect_to_wifi() {
-  WiFiAccessPoint *ap;
-  printf("> Searching for WiFi networks\n");
-  int network_count = wifi.scan(NULL, 0);
-  if (network_count <= 0) {
-    printf("No WiFi hotspots found - can't continue further.\n");
-    return -1;
-  }
-
-  printf("> Connecting to %s...\n", MBED_CONF_APP_WIFI_SSID);
-  int status = wifi.connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD,
-                         NSAPI_SECURITY_WPA_WPA2);
-  if (status != 0) {
-    printf("Connection error\n");
-    return -1;
-  }
-
-  printf("> Connection success! IP: %s\n", wifi.get_ip_address());
-  return 0;
-}
-
 int main() {
   printf("=== SmartLock booted ===\n");
   char *key = generate_private_key();
-  printf("Generated key %s", key);
+  printf("> Generated key is %s", key);
 
-  int status = connect_to_wifi();
+  int status = connect_to_wifi(&wifi);
   if (status < 0) {
     sync_rtc_with_factory();
   } else {
-    sync_rtc_with_ntp();
+    sync_rtc_with_ntp(&wifi);
   }
   wifi.disconnect();
-
 
   printf("Terminated\n");
 }
