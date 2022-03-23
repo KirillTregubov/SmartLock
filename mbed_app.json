@@ -1,9 +1,5 @@
 {
     "config": {
-        "wifi-shield": {
-            "help": "Options are internal, WIFI_IDW0XX1",
-            "value": "internal"
-        },
         "wifi-ssid": {
             "help": "WiFi SSID",
             "value": "\"wifi\""
@@ -12,13 +8,9 @@
             "help": "WiFi Password",
             "value": "\"1234567890\""
         },
-        "wifi-tx": {
-            "help": "TX pin for serial connection to external device",
-            "value": "D1"
-        },
-        "wifi-rx": {
-            "help": "RX pin for serial connection to external device",
-            "value": "D0"
+        "wifi-shield": {
+            "help": "Options are internal, WIFI_IDW0XX1",
+            "value": "internal"
         },
         "wifi-spi_miso": {
             "help": "SPI-MISO connection to external device",
