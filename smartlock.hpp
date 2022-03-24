@@ -10,50 +10,51 @@
 #ifndef SMART_LOCK
 #define SMART_LOCK
 
+#include "ble/BLE.h"
+#include "ble/Gap.h"
 #include "mbed.h"
-// #include "ble/BLE.h"
-// #include "ble/Gap.h"
 #include "ntp-client/NTPClient.h"
 #include <ctype.h>
+#include <events/mbed_events.h>
 
 /* BLE_Service */
 
 /**
  * @brief A handler for the BLE input event.
  */
-class BLEInputHandler : private mbed::NonCopyable<BLEInputHandler>, public ble::Gap::EventHandler
-{
+class BLEInputHandler : private mbed::NonCopyable<BLEInputHandler>,
+                        public ble::GattServer::EventHandler {
 public:
-	/**
-     * @brief Construct a new BLE input handler object.
-	 *
-	 * @return Instance of BLEInputHandler.
-     */
-	BLEInputHandler();
+  /**
+   * @brief Construct a new BLE input handler object.
+   *
+   * @return Instance of BLEInputHandler.
+   */
+  BLEInputHandler();
 
-    /**
-     * @brief Called when the device starts advertising itself to others.
-	 *
-	 * @param ble The BLE singleton.
-	 * @param event_queue The global event queue.
-	 * @return Void.
-     */
-    void start(BLE &ble, events::EventQueue &event_queue);
+  /**
+   * @brief Called when the device starts advertising itself to others.
+   *
+   * @param ble The BLE singleton.
+   * @param event_queue The global event queue.
+   * @return Void.
+   */
+  void start(BLE &ble, events::EventQueue &event_queue);
 
-	/**
-	* This callback doesn't do anything right now except print whatever is
-	* written.
-	*
-	* @param params Information about the characterisitc being updated.
-	* @return Void.
-	*/
-	void onDataWritten(const ble::GattWriteCallbackParams &params) override;
+  /**
+   * This callback doesn't do anything right now except print whatever is
+   * written.
+   *
+   * @param params Information about the characterisitc being updated.
+   * @return Void.
+   */
+  void onDataWritten(const GattWriteCallbackParams &params) override;
 
 private:
-	/**
-     * @brief The GATT Characteristic that communicates the input.
-     */
-	WriteOnlyGattCharacteristic<uint8_t> _input_characteristic;
+  /**
+   * @brief The GATT Characteristic that communicates the input.
+   */
+  WriteOnlyGattCharacteristic<uint8_t> *_input_characteristic;
 };
 
 /**
