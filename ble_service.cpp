@@ -47,9 +47,7 @@ void BLEInputHandler::start(BLE &ble, events::EventQueue &event_queue) {
   }
 
   GattCharacteristic *characteristics[] = {_input_characteristic};
-  GattService input_service(0xA001, characteristics,
-                            sizeof(characteristics) /
-                                sizeof(GattCharacteristic *));
+  GattService input_service(0xA001, characteristics, 1);
 
   ble.gattServer().addService(input_service);
 
