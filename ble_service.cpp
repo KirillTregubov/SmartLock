@@ -24,7 +24,8 @@ class BLEInputHandler : ble::GattServer::EventHandler {
 
 public:
   BLEInputHandler() {
-    _input_characteristic = new WriteOnlyGattCharacteristic<uint8_t>(INPUT_CHARACTERISTIC_UUID, _input_value);
+    static uint8_t inputValue[10] = {0};
+    _input_characteristic = new WriteOnlyGattCharacteristic<uint8_t>(INPUT_CHARACTERISTIC_UUID, inputValue);
 
     if (!_input_characteristic) {
       printf("Allocation of ReadWriteGattCharacteristic failed\r\n");
@@ -69,7 +70,6 @@ public:
 
 private:
   WriteOnlyGattCharacteristic<uint8_t> *_input_characteristic = nullptr;
-  static uint8_t _input_value[10] = {0};
 };
 
 /**
