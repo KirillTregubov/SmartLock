@@ -49,13 +49,13 @@ public:
 
     ble.gattServer().addService(input_service);
 
-    // ble.gattServer().setEventHandler(this);
-    ble.gattServer().onDataWritten(onDataWritten);
+    ble.gattServer().setEventHandler(this);
 
     printf("Service added with UUID 0xA000\r\n");
     printf("Connect and write to characteristic 0xA001\r\n");
   }
 
+private:
   /**
    * This callback doesn't do anything right now except print whatever is
    * written.
@@ -68,7 +68,6 @@ public:
     }
   }
 
-private:
   WriteOnlyGattCharacteristic<uint8_t> *_input_characteristic = nullptr;
 };
 
