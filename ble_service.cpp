@@ -57,7 +57,11 @@ public:
 
   void onDataWritten(const ble::GattWriteCallbackParams &params) override {
     if (params.handle == _input_characteristic->getValueHandle()) {
-      printf("New characteristic value written: %x\r\n", *(params.data));
+      printf("Data received: length = %d, data = 0x",params->len);
+            for(int x=0; x < params->len; x++) {
+                printf("%x", params->data[x]);
+            }
+            printf("\n\r");
     }
   }
 };
