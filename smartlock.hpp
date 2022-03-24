@@ -18,13 +18,58 @@
 
 /* BLE_Service */
 
+/**
+ * @brief A handler for the BLE input event.
+ */
+class BLEInputHandler : private mbed::NonCopyable<BLEInputHandler>, public ble::Gap::EventHandler
+{
+public:
+	/**
+     * @brief Construct a new BLE input handler object.
+	 *
+	 * @return Instance of BLEInputHandler.
+     */
+	BLEInputHandler();
 
+    /**
+     * @brief Called when the device starts advertising itself to others.
+	 *
+	 * @param ble The BLE singleton.
+	 * @param event_queue The global event queue.
+	 * @return Void.
+     */
+    void start(BLE &ble, events::EventQueue &event_queue);
+
+	/**
+	* This callback doesn't do anything right now except print whatever is
+	* written.
+	*
+	* @param params Information about the characterisitc being updated.
+	* @return Void.
+	*/
+	void onDataWritten(const ble::GattWriteCallbackParams &params) override;
+
+private:
+	/**
+     * @brief The GATT Characteristic that communicates the input.
+     */
+	WriteOnlyGattCharacteristic<uint8_t> _input_characteristic;
+};
+
+/**
+ * @brief Initialize the bluetooth server and input handler.
+ *
+ * @param event_queue The global event queue.
+ * @return 0 upon sucess, -1 on error / failure.
+ */
+int init_bluetooth(events::EventQueue &event_queue);
 
 /* WiFi_Service */
 
 /**
  * @brief Connect to the WiFi network specified in 'mbed_app.json'.
  *
+ * @param wifi A WiFiInterface instance.
  * @return 0 upon success, -1 on error / failure.
  */
 int connect_to_wifi(WiFiInterface *wifi);

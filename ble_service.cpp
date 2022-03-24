@@ -17,7 +17,7 @@ public:
   }
 };
 
-class BLEInputHandler : ble::GattServer::EventHandler {
+class BLEInputHandler : private mbed::NonCopyable<BLEInputHandler>, public ble::GattServer::EventHandler {
 
   const uint16_t INPUT_SERVICE_UUID = 0xA000;
   const uint16_t INPUT_CHARACTERISTIC_UUID = 0xA001;
@@ -55,27 +55,13 @@ public:
     printf("Connect and write to characteristic 0xA001\r\n");
   }
 
-private:
-  /**
-   * This callback doesn't do anything right now except print whatever is
-   * written.
-   *
-   * @param[in] params Information about the characterisitc being updated.
-   */
-  void onDataWritten(const GattWriteCallbackParams &params) {
+  void onDataWritten(const ble::GattWriteCallbackParams &params) override {
     if (params.handle == _input_characteristic->getValueHandle()) {
       printf("New characteristic value written: %x\r\n", *(params.data));
     }
   }
-
-  WriteOnlyGattCharacteristic<uint8_t> *_input_characteristic = nullptr;
 };
 
-/**
- * Call this to start the bluetooth server and listener.
- *
- * @param[in] event_queue The global event queue.
- */
 int init_bluetooth(events::EventQueue &event_queue) {
   BLE &ble = BLE::Instance();
 
