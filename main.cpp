@@ -14,6 +14,7 @@
 
 #include "mbed.h"
 #include "smartlock.hpp"
+#include "datastore.h"
 // IN CASE SOMETHING BREAKS \/
 // #include "TCPSocket.h"
 // #include <time.h>
@@ -87,6 +88,9 @@ int main() {
     sync_rtc_with_ntp(&wifi);
   }
   wifi.disconnect();
+
+  printf("Mounting file system\n");
+  mount();
 
   printf("Terminated\n");
 }

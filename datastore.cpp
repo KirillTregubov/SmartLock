@@ -53,13 +53,13 @@ void erase() {
 
 void mount(){
     int err = fs.mount(bd);
-    printf("%s\n", (err ? "Fail :(" : "OK"));
+    printf("%s\n", (err ? "No file system found" : "OK"));
     if (err) {
         // Reformat if we can't mount the filesystem
-        printf("formatting... ");
+        printf("Formatting... ");
         fflush(stdout);
         err = fs.reformat(bd);
-        printf("%s\n", (err ? "Fail :(" : "OK"));
+        printf("%s\n", (err ? "Reformat failed" : "OK"));
         if (err) {
             error("error: %s (%d)\n", strerror(-err), err);
         }
