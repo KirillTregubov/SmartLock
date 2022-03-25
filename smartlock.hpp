@@ -54,7 +54,7 @@ private:
   DigitalOut _led1;
   DigitalOut _led2;
 
-  void _update_pin(lock_state_t new_state);
+  void _update_state(lock_state_t new_state);
 };
 
 /* BLE_Service */

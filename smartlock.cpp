@@ -8,15 +8,16 @@
  */
 #include "smartlock.hpp"
 
-SmartLock::SmartLock() : _lock_state(SmartLock::LOCKED), _out_pin(A0), _led1(LED1), _led2(LED2) {
+SmartLock::SmartLock()
+    : _lock_state(SmartLock::LOCKED), _out_pin(A0), _led1(LED1), _led2(LED2) {
   _out_pin = 0.0f;
-  
+
   printf(">SmartLock initialized to LOCKED\n");
-  printf("%s", _lock_state);
+  printf("lock_state: %d\n", _lock_state);
 }
 
 void SmartLock::lock() {
-	_update_state(SmartLock::LOCKED);
+  _update_state(SmartLock::LOCKED);
   printf(">SmartLock LOCKED\n");
 
   for (int i = 0; i < 2; i++) {
@@ -28,7 +29,7 @@ void SmartLock::lock() {
 }
 
 void SmartLock::unlock() {
-	_update_state(SmartLock::UNLOCKED);
+  _update_state(SmartLock::UNLOCKED);
   printf(">SmartLock UNLOCKED\n");
 
   _led2 = 1;
@@ -45,7 +46,7 @@ void SmartLock::unlock() {
 
 void SmartLock::_update_state(lock_state_t new_state) {
   _lock_state = new_state;
-  
+
   if (new_state == SmartLock::UNLOCKED) {
     _out_pin = 1.0f;
   } else {
