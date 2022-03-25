@@ -50,8 +50,11 @@ public:
 
 private:
   lock_state_t _lock_state;
+  AnalogOut _out_pin;
   DigitalOut _led1;
   DigitalOut _led2;
+
+  void _update_pin(lock_state_t new_state);
 };
 
 /* BLE_Service */
