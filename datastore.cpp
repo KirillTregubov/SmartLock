@@ -4,9 +4,17 @@
 #endif
 
 #include "mbed.h"
+
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <functional>
+
+#define PRIVATE_KEY_LENGTH 20
+#define PRIVATE_KEY_PATH "/fs/private_key.txt"
+#define RESET_KEY_LENGTH 20
+#define RESET_KEY_PATH "/fs/reset_key.txt"
 
 #define BUFFER_MAX_LEN 10
 
@@ -56,15 +64,46 @@ void mount(){
     }
 }
 
-void read_file_as_string(const char *file_name, char *buffer){
-    FILE *f = fopen(file_name, "r+");
-    fseek (f, 0, SEEK_END);
-    long file_length = ftell (f);
-    fseek (f, 0, SEEK_SET);
-    buffer = (char *)malloc(file_length);
-    if (buffer)
-    {
-        fread (buffer, 1, file_length, f);
+int get_private_key(char* buf){
+    FILE *f = fopen(PRIVATE_KEY_PATH, "r");
+    if (f){
+        fgets(buf, PRIVATE_KEY_LENGTH + 1, f);
+        fclose (f);
+        return 0;
     }
-    fclose (f);
+    printf("Cannot open file for read %s: %s\n", PRIVATE_KEY_PATH, strerror(errno));
+    return -1;
+}
+
+int get_reset_key(char* buf){
+    FILE *f = fopen(RESET_KEY_PATH, "r");
+    if (f){
+        fgets(buf, RESET_KEY_LENGTH + 1, f);
+        fclose (f);
+        return 0;
+    }
+    printf("Cannot open file for read %s: %s\n", RESET_KEY_PATH, strerror(errno));
+    return -1;
+}
+
+int set_private_key(const char* key){
+    FILE *f = fopen(PRIVATE_KEY_PATH, "w");
+    if (f){
+        fprintf(f, "%*s", PRIVATE_KEY_LENGTH + 1, key);
+        fclose (f);
+        return 0;
+    }
+    printf("Cannot open file for write %s: %s\n", PRIVATE_KEY_PATH, strerror(errno));
+    return -1;
+}
+
+int set_reset_key(const char* key){
+    FILE *f = fopen(RESET_KEY_PATH, "w");
+    if (f){
+        fprintf(f, "%*s", RESET_KEY_LENGTH + 1, key);
+        fclose (f);
+        return 0;
+    }
+    printf("Cannot open file for write %s: %s\n", RESET_KEY_PATH, strerror(errno));
+    return -1;
 }
