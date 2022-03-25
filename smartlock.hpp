@@ -10,12 +10,49 @@
 #ifndef SMART_LOCK
 #define SMART_LOCK
 
+#include "mbed.h"
 #include "ble/BLE.h"
 #include "ble/Gap.h"
-#include "mbed.h"
 #include "ntp-client/NTPClient.h"
 #include <ctype.h>
 #include <events/mbed_events.h>
+// #include <chrono>
+
+/* SmartLock_Manager */
+
+class SmartLock {
+public:
+  enum lock_state_t {
+    LOCKED,
+    UNLOCKED
+  };
+
+  /**
+   * @brief Construct a new SmartLock object.
+   *
+   * @return Instance of SmartLock.
+   */
+  SmartLock();
+
+  /**
+   * @brief Lock the Smart Lock and update states.
+   *
+   * @return Void.
+   */
+  void lock();
+
+  /**
+   * @brief Unlock the Smart Lock and update states.
+   *
+   * @return Void.
+   */
+  void unlock();
+
+private:
+  lock_state_t _lock_state;
+  DigitalOut _led1;
+  DigitalOut _led2;
+};
 
 /* BLE_Service */
 
