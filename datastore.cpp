@@ -17,6 +17,7 @@
 #define PRIVATE_KEY_PATH "/fs/private_key.txt"
 #define RESET_KEY_LENGTH 20
 #define RESET_KEY_PATH "/fs/reset_key.txt"
+#define LOGS_PATH "/fs/logs.txt"
 
 #define BUFFER_MAX_LEN 10
 
@@ -29,7 +30,7 @@ void erase() {
     printf("Initializing the block device... ");
     fflush(stdout);
     int err = bd->init();
-    printf("%s\n", (err ? "Fail :(" : "OK"));
+    printf("%s\n", (err ? "Failed on init" : "OK"));
     if (err) {
         error("error: %s (%d)\n", strerror(-err), err);
     }
@@ -37,7 +38,7 @@ void erase() {
     printf("Erasing the block device... ");
     fflush(stdout);
     err = bd->erase(0, bd->size());
-    printf("%s\n", (err ? "Fail :(" : "OK"));
+    printf("%s\n", (err ? "Failed on erase" : "OK"));
     if (err) {
         error("error: %s (%d)\n", strerror(-err), err);
     }
@@ -45,7 +46,7 @@ void erase() {
     printf("Deinitializing the block device... ");
     fflush(stdout);
     err = bd->deinit();
-    printf("%s\n", (err ? "Fail :(" : "OK"));
+    printf("%s\n", (err ? "Failed on deinit" : "OK"));
     if (err) {
         error("error: %s (%d)\n", strerror(-err), err);
     }
@@ -107,5 +108,35 @@ int set_reset_key(const char* key){
         return 0;
     }
     printf("Cannot open file for write %s: %s\n", RESET_KEY_PATH, strerror(errno));
+    return -1;
+}
+
+int write_log(const char* log){
+    time_t seconds = time(NULL);
+    char * formatted_time = (char *)malloc(20);
+    struct tm * timeinfo = localtime(&seconds);
+    strftime(formatted_time, 20, "%m/%d/%y %H:%M:%S", timeinfo);
+
+    FILE *f = fopen(LOGS_PATH, "a");
+    if (f){
+        fprintf(f, "[%s] %s\n", formatted_time, log);
+        fclose (f);
+        return 0;
+    }
+    printf("Cannot open file for append %s: %s\n", LOGS_PATH, strerror(errno));
+    return -1;
+}
+
+int print_logs(){
+    FILE *f = fopen(LOGS_PATH, "r");
+    int c;
+    if (f){
+        while ((c = getc(f)) != EOF){
+            putchar(c);
+        }
+        fclose(f);
+        return 0;
+    }
+    printf("Cannot open file for read %s: %s\n", LOGS_PATH, strerror(errno));
     return -1;
 }

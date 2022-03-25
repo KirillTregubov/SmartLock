@@ -12,4 +12,8 @@ int set_private_key(const char* key);
 
 int set_reset_key(const char* key);
 
+int write_log(const char* log);
+
+int print_logs();
+
 #endif
