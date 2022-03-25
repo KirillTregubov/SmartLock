@@ -2,6 +2,8 @@
 #ifndef DATASTORE
 #define DATASTORE
 
+void mount();
+
 int get_private_key(char* buf);
 
 int get_reset_key(char* buf);
