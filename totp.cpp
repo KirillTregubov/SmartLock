@@ -114,11 +114,15 @@ int DT(uint8_t * hmac_result){
 int validateTOTP(const char * secret_hex, char * TOTP_string, time_t unix_time){
 	// t0 = 0, timestep = 30
 	long counter = unix_time / 30;
-	uint8_t* counter_bytes = (uint8_t*) malloc(8);
-	for (int i = 0; i < 8; i++)
-    {
-        counter_bytes[i] = ((counter >> (8 * i)) & 0XFF);
-    }
+	uint8_t* counter_bytes = (uint8_t *)malloc(8);
+	counter_bytes[0] = (counter >> 56) & 0xFF;
+	counter_bytes[1] = (counter >> 48) & 0xFF;
+	counter_bytes[2] = (counter >> 40) & 0xFF;
+	counter_bytes[3] = (counter >> 32) & 0xFF;
+	counter_bytes[4] = (counter >> 24) & 0xFF;
+	counter_bytes[5] = (counter >> 16) & 0xFF;
+	counter_bytes[6] = (counter >> 8) & 0xFF;
+	counter_bytes[7] = counter & 0xFF;
 
 	//printf("counter: %08x\n", *counter_bytes);
 
