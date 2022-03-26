@@ -111,7 +111,7 @@ int DT(uint8_t * hmac_result){
     return p;   
 }
 
-int validateTOTP(const char * secret_hex, char * TOTP_string, time_t unix_time){
+int validateTOTP(const char * secret_hex, const char * TOTP_string, time_t unix_time){
 	// t0 = 0, timestep = 30
 	unsigned long counter = unix_time / 30;
 	uint8_t* counter_bytes = (uint8_t *)malloc(8);
