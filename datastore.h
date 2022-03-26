@@ -1,6 +1,6 @@
 // Header file for datastore.
-#ifndef DATASTORE
-#define DATASTORE
+#ifndef DATASTORE_H
+#define DATASTORE_H
 
 void mount();
 
