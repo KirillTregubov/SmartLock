@@ -2,7 +2,7 @@
 #ifndef DATASTORE_H
 #define DATASTORE_H
 
-void mount();
+int mount_fs();
 
 int get_private_key(char* buf);
 

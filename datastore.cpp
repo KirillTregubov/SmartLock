@@ -52,7 +52,7 @@ void erase() {
     }
 }
 
-void mount(){
+int mount_fs(){
     int err = fs.mount(bd);
     printf("%s\n", (err ? "No file system found" : "OK"));
     if (err) {
@@ -63,8 +63,10 @@ void mount(){
         printf("%s\n", (err ? "Reformat failed" : "OK"));
         if (err) {
             error("error: %s (%d)\n", strerror(-err), err);
+            return -1;
         }
     }
+    return 0;
 }
 
 int get_private_key(char* buf){

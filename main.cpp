@@ -26,6 +26,9 @@
 ISM43362Interface wifi(false);
 #endif
 
+static EventQueue event_queue(/* event count */ 10 * EVENTS_EVENT_SIZE);
+InterruptIn button1(BUTTON1);
+
 /**
  * @brief Generate a private key using onboard TRNG chip.
  *
@@ -90,7 +93,13 @@ int main() {
   wifi.disconnect();
 
   printf("Mounting file system\n");
-  mount();
+  mount_fs();
+
+  printf("Starting BLE server\n");
+  init_bluetooth(event_queue);
+
+  printf("Setting up log output");
+  button1.fall(callback(&print_logs));
 
   printf("Terminated\n");
 }
