@@ -43,7 +43,8 @@
     },
     "target_overrides": {
         "*": {
-            "platform.stdio-convert-newlines": true,
+            "platform.callback-nontrivial"      : true,
+            "platform.stdio-convert-newlines": true,  
             "target.features_add" : ["EXPERIMENTAL_API", "PSA"],
             "target.extra_labels_add": ["MBED_PSA_SRV"]
         },

@@ -96,7 +96,7 @@ int main() {
   mount_fs();
 
   printf("Setting up log output");
-  button1.fall(callback(&print_logs));
+  button1.fall(event_queue.event(print_logs));
 
   printf("Starting BLE server\n");
   init_bluetooth(event_queue);
