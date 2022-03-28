@@ -146,7 +146,7 @@ int validate_for_time(const char * secret_hex, const char * TOTP_string, time_t 
 
 int validate(const char *secret_hex, const char *TOTP_string){
     time_t current_time = time(NULL);
-    return validate_for_time(secret_hex, TOTP_string, current_time) |
-    validate_for_time(secret_hex, TOTP_string, current_time + 30) |
+    return validate_for_time(secret_hex, TOTP_string, current_time) ||
+    validate_for_time(secret_hex, TOTP_string, current_time + 30) ||
     validate_for_time(secret_hex, TOTP_string, current_time - 30);
 }
