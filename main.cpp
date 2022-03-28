@@ -95,11 +95,11 @@ int main() {
   printf("Mounting file system\n");
   mount_fs();
 
-  printf("Starting BLE server\n");
-  init_bluetooth(event_queue);
-
   printf("Setting up log output");
   button1.fall(callback(&print_logs));
+
+  printf("Starting BLE server\n");
+  init_bluetooth(event_queue);
 
   printf("Terminated\n");
 }
