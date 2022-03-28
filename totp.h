@@ -5,6 +5,6 @@
 #include <mbed.h>
 
 // Returns 1 if valid, 0 otherwise.
-int validateTOTP(const char * secret_hex, const char * TOTP_string, time_t unix_time);
+int validate(const char * secret_hex, const char * TOTP_string);
 
 #endif
