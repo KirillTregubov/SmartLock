@@ -14,7 +14,7 @@
 
 #include "mbed.h"
 #include "smartlock.hpp"
-#include "datastore.h"
+#include "datastore.hpp"
 // IN CASE SOMETHING BREAKS \/
 // #include "TCPSocket.h"
 // #include <time.h>

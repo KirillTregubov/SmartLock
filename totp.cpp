@@ -1,3 +1,5 @@
+#include "totp.hpp"
+
 #include <mbed.h>
 #include <crypto.h>
 #include <cstdint>

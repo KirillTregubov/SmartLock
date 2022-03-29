@@ -1,4 +1,4 @@
-#include "datastore.h"
+#include "datastore.hpp"
 
 // Target board has QSPI Flash
 #if !(COMPONENT_QSPIF)
