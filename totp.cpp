@@ -1,7 +1,7 @@
 #include "totp.hpp"
 
 #include <mbed.h>
-#include <crypto.h>
+#include <ppp_opts.h>
 #include <cstdint>
 #include <stdio.h>
 #include <stdint.h>
@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #define SHA1_DIGEST_LENGTH 20
+#define SHA1_BLOCKSIZE     64
 
 // Just in case
 int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest){
@@ -22,40 +23,16 @@ int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest){
 		i_key[i] = 0x36;
 	}
 
-    // The following four are used for both hash operations
-    psa_status_t status;
-    psa_algorithm_t alg = PSA_ALG_SHA_1;
-    psa_hash_operation_t operation = PSA_HASH_OPERATION_INIT;
-    size_t actual_hash_len;
-
 	uint8_t i_sha[SHA1_DIGEST_LENGTH];
     
-    /* Clean up hash operation context prior to init, just in case */
-    psa_hash_abort(&operation);
     /* Compute hash of inner message  */
-    status = psa_hash_setup(&operation, alg);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to begin inner hash operation\n");
-        return -1;
-    }
-    status = psa_hash_update(&operation, i_key, PSA_HASH_MAX_SIZE);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to update inner hash operation (1)\n");
-        return -1;
-    }
-    status = psa_hash_update(&operation, counter, 8);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to update inner hash operation (2)\n");
-        return -1;
-    }
-    status = psa_hash_finish(&operation, i_sha, SHA1_DIGEST_LENGTH,
-                             &actual_hash_len);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to finish inner hash operation\n");
-        return -1;
-    }
-    /* Clean up hash operation context */
-    psa_hash_abort(&operation);
+
+    mbedtls_sha1_context *ctx = (mbedtls_sha1_context *)malloc(sizeof(mbedtls_sha1_context));
+
+    mbedtls_sha1_starts_ret(ctx);
+    mbedtls_sha1_update_ret(ctx, i_key, SHA1_BLOCKSIZE);
+    mbedtls_sha1_update_ret(ctx, counter, 8);
+    mbedtls_sha1_finish_ret(ctx, i_sha);
 
 	//HMAC = H[(secret xor opad) + H((secret xor ipad) + counter)];
 	uint8_t o_key[PSA_HASH_MAX_SIZE] = {0};
@@ -67,29 +44,10 @@ int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest){
 	}
 
     /* Compute hash of outer message  */
-    status = psa_hash_setup(&operation, alg);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to begin outer hash operation\n");
-        return -1;
-    }
-    status = psa_hash_update(&operation, o_key, PSA_HASH_MAX_SIZE);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to update outer hash operation (1)\n");
-        return -1;
-    }
-    status = psa_hash_update(&operation,  i_sha, SHA1_DIGEST_LENGTH);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to update outer hash operation (2)\n");
-        return -1;
-    }
-    status = psa_hash_finish(&operation, digest, SHA1_DIGEST_LENGTH,
-                             &actual_hash_len);
-    if (status != PSA_SUCCESS) {
-        printf("Failed to finish outer hash operation\n");
-        return -1;
-    }
-    /* Clean up hash operation context */
-    psa_hash_abort(&operation);
+    mbedtls_sha1_starts_ret(ctx);
+    mbedtls_sha1_update_ret(ctx, o_key, SHA1_BLOCKSIZE);
+    mbedtls_sha1_update_ret(ctx, i_sha, SHA1_DIGEST_LENGTH);
+    mbedtls_sha1_finish_ret(ctx, digest);
 
 	return 0;
 }
@@ -141,7 +99,7 @@ int validate_for_time(const char * secret_hex, const char * TOTP_string, time_t 
 	manual_HMAC(secret_bytes, counter_bytes, hmac_out);
 	int TOTP = DT(hmac_out) % 1000000;
 	int TOTP_input = atoi(TOTP_string);
-	printf("Calculated TOTP Value: %d\n", TOTP);
+	printf("Calculated TOTP Value: %6d\n", TOTP);
 
 	return TOTP == TOTP_input;
 }
