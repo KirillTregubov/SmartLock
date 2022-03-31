@@ -18,6 +18,9 @@
 #include <events/mbed_events.h>
 // #include <chrono>
 
+#define WIFI_SSID "Fido"
+#define WIFI_PASSWORD "newcomer3360"
+
 /* SmartLock_Manager */
 
 class SmartLock {

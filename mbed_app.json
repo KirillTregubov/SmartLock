@@ -1,13 +1,5 @@
 {
     "config": {
-        "wifi-ssid": {
-            "help": "WiFi SSID",
-            "value": "\"wifi\""
-        },
-        "wifi-password": {
-            "help": "WiFi Password",
-            "value": "\"1234567890\""
-        },
         "wifi-shield": {
             "help": "Options are internal, WIFI_IDW0XX1",
             "value": "internal"
