@@ -18,8 +18,8 @@
 #include <events/mbed_events.h>
 // #include <chrono>
 
-#define WIFI_SSID "Fido"
-#define WIFI_PASSWORD "newcomer3360"
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
 
 /* SmartLock_Manager */
 
@@ -84,6 +84,12 @@ public:
    */
   void start(BLE &ble, events::EventQueue &event_queue);
 
+private:
+  /**
+   * @brief The GATT Characteristic that communicates the input.
+   */
+  WriteOnlyGattCharacteristic<uint8_t> *_input_characteristic;
+
   /**
    * This callback doesn't do anything right now except print whatever is
    * written.
@@ -92,12 +98,6 @@ public:
    * @return Void.
    */
   void onDataWritten(const GattWriteCallbackParams &params) override;
-
-private:
-  /**
-   * @brief The GATT Characteristic that communicates the input.
-   */
-  WriteOnlyGattCharacteristic<uint8_t> *_input_characteristic;
 };
 
 /**

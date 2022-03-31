@@ -34,9 +34,7 @@ InterruptIn button1(BUTTON1);
  *
  * @return The address of the generated key.
  */
-char *generate_private_key() {
-  printf("> Generate key\n");
-
+int generate_private_key(char *buffer, int buffersize) {
   psa_status_t status;
   status = psa_crypto_init();
   if (status != PSA_SUCCESS) {
@@ -65,24 +63,27 @@ char *generate_private_key() {
     printf("Failed to export key (%d)\n", status);
     return NULL;
   }
-
+  
   char key[exported_length];
   int index = 0;
   for (int i = 0; i < exported_length; i++) {
     index += sprintf(&key[index], "%02x", exported[i]);
   }
-  printf("Key: %s (len: %d)\n", strupr(key), strlen(key));
+  // printf("Key: %s (len: %d)\n", strupr(key), strlen(key));
 
   psa_reset_key_attributes(&attributes);
   mbedtls_psa_crypto_free();
 
-  return strupr(key);
+  strncpy(buffer, strupr(key), buffersize);
+  return 0;
 }
 
 int main() {
   printf("=== SmartLock booted ===\n");
-  char *key = generate_private_key();
-  printf("> Generated key is %s", key);
+
+  char key[20];
+  generate_private_key(key, sizeof(key));
+  printf("> Generated key is %s\n", key);
 
   int status = connect_to_wifi(&wifi);
   if (status < 0) {

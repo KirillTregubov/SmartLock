@@ -53,11 +53,14 @@ void BLEInputHandler::start(BLE &ble, events::EventQueue &event_queue) {
 
   ble.gattServer().setEventHandler(this);
 
+//   ble.gattClient().onDataWritten(&BLEInputHandler::onDataWritten);
+
   printf("Service added with UUID 0xA000\r\n");
   printf("Connect and write to characteristic 0xA001\r\n");
 }
 
 void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
+    printf("DATA WRITTEN\n");
   if (params.handle == _input_characteristic->getValueHandle()) {
     printf("Data received: length = %d, data = 0x", params.len);
     for (int x = 0; x < params.len; x++) {
