@@ -15,11 +15,6 @@
 #include "mbed.h"
 #include "smartlock.hpp"
 #include "datastore.hpp"
-// IN CASE SOMETHING BREAKS \/
-// #include "TCPSocket.h"
-// #include <time.h>
-// #include "mbedtls/version.h"
-// #include "psa/crypto.h"
 
 #if defined(TARGET_DISCO_L475VG_IOT01A)
 #include "ISM43362Interface.h"
