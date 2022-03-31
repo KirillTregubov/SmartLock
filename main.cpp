@@ -93,14 +93,16 @@ int main() {
   }
   wifi.disconnect();
 
-  printf("Mounting file system\n");
+  printf("> Mounting file system\n");
   mount_fs();
 
-  printf("Setting up log output");
+  printf("> Setting up log output\n");
   button1.fall(event_queue.event(print_logs));
 
-  printf("Starting BLE server\n");
-  init_bluetooth(event_queue);
+  SmartLock smart_lock(&event_queue);
 
-  printf("Terminated\n");
+  printf("> Starting BLE server\n");
+  init_bluetooth(event_queue, &smart_lock);
+
+  printf("> Terminated\n");
 }

@@ -16,7 +16,9 @@
 #include "ntp-client/NTPClient.h"
 #include <ctype.h>
 #include <events/mbed_events.h>
-// #include <chrono>
+#include "totp.hpp"
+#include <chrono>
+using namespace std::chrono_literals;
 
 /* SmartLock_Manager */
 
@@ -32,7 +34,7 @@ public:
    *
    * @return Instance of SmartLock.
    */
-  SmartLock();
+  SmartLock(events::EventQueue *event_queue);
 
   /**
    * @brief Lock the Smart Lock and update states.
@@ -50,6 +52,7 @@ public:
 
 private:
   lock_state_t _lock_state;
+  EventQueue *_event_queue;
   AnalogOut _out_pin;
   DigitalOut _led1;
   DigitalOut _led2;
@@ -70,7 +73,7 @@ public:
    *
    * @return Instance of BLEInputHandler.
    */
-  BLEInputHandler();
+  BLEInputHandler(SmartLock *smart_lock);
 
   /**
    * @brief Called when the device starts advertising itself to others.
@@ -85,7 +88,8 @@ private:
   /**
    * @brief The GATT Characteristic that communicates the input.
    */
-  WriteOnlyGattCharacteristic<uint8_t> *_input_characteristic;
+  WriteOnlyArrayGattCharacteristic<uint8_t, 3> *_input_characteristic;
+  SmartLock *_smart_lock;
 
   /**
    * This callback doesn't do anything right now except print whatever is
@@ -103,7 +107,7 @@ private:
  * @param event_queue The global event queue.
  * @return 0 upon sucess, -1 on error / failure.
  */
-int init_bluetooth(events::EventQueue &event_queue);
+int init_bluetooth(events::EventQueue &event_queue, SmartLock *smart_lock);
 
 /* WiFi_Service */
 

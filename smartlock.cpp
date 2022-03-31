@@ -8,17 +8,16 @@
  */
 #include "smartlock.hpp"
 
-SmartLock::SmartLock()
-    : _lock_state(SmartLock::LOCKED), _out_pin(A0), _led1(LED1), _led2(LED2) {
+SmartLock::SmartLock(EventQueue *event_queue)
+    : _lock_state(SmartLock::LOCKED), _event_queue(event_queue), _out_pin(D7), _led1(LED1), _led2(LED2) {
   _out_pin = 0.0f;
 
-  printf(">SmartLock initialized to LOCKED\n");
-  printf("lock_state: %d\n", _lock_state);
+  printf("> SmartLock initialized to LOCKED\n");
 }
 
 void SmartLock::lock() {
   _update_state(SmartLock::LOCKED);
-  printf(">SmartLock LOCKED\n");
+  printf("> SmartLock LOCKED\n");
 
   for (int i = 0; i < 2; i++) {
     _led1 = 1;
@@ -30,7 +29,7 @@ void SmartLock::lock() {
 
 void SmartLock::unlock() {
   _update_state(SmartLock::UNLOCKED);
-  printf(">SmartLock UNLOCKED\n");
+  printf("> SmartLock UNLOCKED\n");
 
   _led2 = 1;
   for (int i = 0; i < 2; i++) {
@@ -42,6 +41,8 @@ void SmartLock::unlock() {
     }
   }
   _led2 = 0;
+
+  _event_queue->call_in(7500ms, this, &SmartLock::lock);
 }
 
 void SmartLock::_update_state(lock_state_t new_state) {

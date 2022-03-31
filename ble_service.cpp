@@ -24,10 +24,12 @@ public:
   }
 };
 
-BLEInputHandler::BLEInputHandler() {
-  static uint8_t inputValue[10];
+BLEInputHandler::BLEInputHandler(SmartLock *smart_lock) {
+  uint8_t inputValue[3];
   _input_characteristic =
-      new WriteOnlyGattCharacteristic<uint8_t>(0xA000, inputValue);
+      new WriteOnlyArrayGattCharacteristic<uint8_t, sizeof(inputValue)>(
+          0xA000, inputValue);
+  _smart_lock = smart_lock;
 
   if (!_input_characteristic) {
     printf("Allocation of ReadWriteGattCharacteristic failed\r\n");
@@ -53,29 +55,41 @@ void BLEInputHandler::start(BLE &ble, events::EventQueue &event_queue) {
 
   ble.gattServer().setEventHandler(this);
 
-//   ble.gattClient().onDataWritten(&BLEInputHandler::onDataWritten);
+  //   ble.gattClient().onDataWritten(&BLEInputHandler::onDataWritten);
 
   printf("Service added with UUID 0xA000\r\n");
   printf("Connect and write to characteristic 0xA001\r\n");
 }
 
 void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
-    printf("DATA WRITTEN\n");
   if (params.handle == _input_characteristic->getValueHandle()) {
-    printf("Data received: length = %d, data = 0x", params.len);
-    for (int x = 0; x < params.len; x++) {
-      printf("%x", params.data[x]);
+    if (params.len != 3) {
+      printf("> Received code has incorrect length\n");
+      return;
     }
-    printf("\n\r");
+    char code[6];
+    int index = 0;
+    for (int i = 0; i < params.len; i++) {
+      index += sprintf(&code[index], "%02x", params.data[i]);
+    }
+    printf("> Received code is %s\n\r", code);
+
+    if (validate("569861750830A66BEBFF", code)) {
+      printf(">Validated successfully!\n");
+      _smart_lock->unlock();
+    } else {
+      printf("> Received incorrect code\n");
+    }
   }
 }
 
-int init_bluetooth(events::EventQueue &event_queue) {
+int init_bluetooth(events::EventQueue &event_queue, SmartLock *smart_lock) {
+
   BLE &ble = BLE::Instance();
 
   printf("\r\nGATT server with one writable characteristic\r\n");
 
-  BLEInputHandler inputHandler;
+  BLEInputHandler inputHandler(smart_lock);
 
   SmartLockBLEProcess ble_process(event_queue, ble);
 
