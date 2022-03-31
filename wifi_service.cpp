@@ -7,6 +7,7 @@
  * @bug No known bugs.
  */
 #include "smartlock.hpp"
+#include "wifi_credentials.hpp"
 
 int connect_to_wifi(WiFiInterface *wifi) {
   WiFiAccessPoint *ap;

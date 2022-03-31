@@ -1,0 +1,7 @@
+#ifndef WIFI_CREDENTIALS
+#define WIFI_CREDENTIALS
+
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
+
+#endif // WIFI_CREDENTIALS
