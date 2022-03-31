@@ -7,4 +7,3 @@ wifi-ism43362
 ntp-client
 mbed-os-ble-utils
 .mbed
-wifi_credentials.hpp
