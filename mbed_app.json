@@ -33,13 +33,13 @@
             "value": "PB_12"
         }
     },
+    "macros": ["MBEDTLS_USER_CONFIG_FILE=\"mbedtls-config-changes.h\""],
     "target_overrides": {
         "*": {
             "platform.callback-nontrivial"      : true,
             "platform.stdio-convert-newlines": true,  
             "target.features_add" : ["EXPERIMENTAL_API", "PSA"],
-            "target.extra_labels_add": ["MBED_PSA_SRV"],
-            "target.macro_add": ["MBEDTLS_SHA1_C"]
+            "target.extra_labels_add": ["MBED_PSA_SRV"]
         },
         "DISCO_L475VG_IOT1A": {
             "wifi-spi_miso": "PC_11",
