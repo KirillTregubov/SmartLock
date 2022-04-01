@@ -5,9 +5,9 @@
  * @copyright Copyright (c) 2022 Kirill Tregubov & Philip Cai
  *
  * @brief Main SmartLock program.
- *
- * This generates the private key, syncs the RTC with an NTP
- * server, and initializes the BLE.
+ * This module generates the private key, prints an Authenticator QR code, syncs
+ * the RTC with an NTP server, mounts the filesystem, registers the log output,
+ * and initializes the BLE.
  *
  * @bug No known bugs.
  */
@@ -15,6 +15,10 @@
 #include "mbed.h"
 #include "smartlock.hpp"
 #include "datastore.hpp"
+#include "qrcodegen.hpp"
+#include "totp.hpp"
+
+using qrcodegen::QrCode;
 
 #if defined(TARGET_DISCO_L475VG_IOT01A)
 #include "ISM43362Interface.h"
@@ -58,7 +62,7 @@ int generate_private_key(char *buffer, int buffersize) {
     printf("Failed to export key (%d)\n", status);
     return NULL;
   }
-  
+
   char key[exported_length];
   int index = 0;
   for (int i = 0; i < exported_length; i++) {
@@ -73,12 +77,37 @@ int generate_private_key(char *buffer, int buffersize) {
   return 0;
 }
 
+/**
+ * @brief Prints the given QrCode object to the console.
+ *
+ * From the QR Code generator library (C++)
+ * https://www.nayuki.io/page/qr-code-generator-library
+ *
+ * @author Project Nayuki (nayuki)
+ * @copyright Copyright (c) Project Nayuki. (MIT License)
+ */
+void printQr(const QrCode &qr) {
+  int border = 2;
+  for (int y = -border; y < qr.getSize() + border; y++) {
+    for (int x = -border; x < qr.getSize() + border; x++) {
+      printf(qr.getModule(x, y) ? "⬛⬛" : "⬜⬜");
+    }
+    printf("\n");
+  }
+  printf("\n");
+}
+
 int main() {
   printf("=== SmartLock booted ===\n");
 
   char key[20];
   generate_private_key(key, sizeof(key));
   printf("> Generated key is %s\n", key);
+
+  // TODO: generate base32 secret
+  const QrCode qr0 = QrCode::encodeText(
+      "otpauth://totp/SmartLock?secret=JBSWY3DPEHPK3PXP", QrCode::Ecc::MEDIUM);
+  printQr(qr0);
 
   int status = connect_to_wifi(&wifi);
   if (status < 0) {
