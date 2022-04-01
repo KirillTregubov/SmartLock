@@ -12,11 +12,10 @@
 void sync_rtc_with_factory() {
   set_time(1648016868);
   time_t factory_time = time(NULL);
-  printf("> Defaulted RTC to %s.", ctime(&factory_time));
+  printf("> Defaulted RTC to %s", ctime(&factory_time));
 }
 
 void sync_rtc_with_ntp(NetworkInterface *wifi) {
-  //   NTPClient ntp(&wifi); OLD
   NTPClient ntp(wifi);
   time_t timestamp = ntp.get_timestamp();
   if (timestamp < 0) {

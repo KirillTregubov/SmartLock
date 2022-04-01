@@ -11,13 +11,14 @@
  *
  * @bug No known bugs.
  */
-#include "mbed.h"
 #include "ble_service.hpp"
 #include "datastore.hpp"
 #include "helpers.hpp"
+#include "mbed.h"
 #include "qrcodegen.hpp"
 #include "rtc_service.hpp"
 #include "smartlock.hpp"
+
 // #include "totp.hpp"
 #include "wifi_service.hpp"
 
@@ -67,18 +68,50 @@ int generate_private_key(char *buffer, int buffersize) {
     return NULL;
   }
 
-  char key[exported_length];
+  char key[10] = {0};
   int index = 0;
-  for (int i = 0; i < exported_length; i++) {
+  for (int i = 0; i < 10; i++) {
     index += sprintf(&key[index], "%02x", exported[i]);
   }
-  // printf("Key: %s (len: %d)\n", strupr(key), strlen(key));
 
   psa_reset_key_attributes(&attributes);
   mbedtls_psa_crypto_free();
 
   strncpy(buffer, strupr(key), buffersize);
   return 0;
+}
+
+void generate_reset() {
+  psa_status_t status;
+  uint8_t random[36] = {0};
+
+  fflush(stdout);
+
+  status = psa_crypto_init();
+  if (status != PSA_SUCCESS) {
+    printf("Failed to initialize PSA Crypto\n");
+    return;
+  }
+
+  status = psa_generate_random(random, sizeof(random));
+  if (status != PSA_SUCCESS) {
+    printf("Failed to generate a random value (%" PRIu32 ")\n", status);
+    return;
+  }
+
+  char keys[6][7];
+  for (int i = 0; i < 36; i++) {
+    keys[i / 6][i % 6] = 'A' + (random[i] % 26);
+  }
+
+  printf("> Generated recovery keys\n");
+
+  for (int i = 0; i < 6; i++) {
+    keys[i][6] = '\0';
+    printf("%s\n", keys[i]);
+  }
+
+  mbedtls_psa_crypto_free();
 }
 
 /**
@@ -98,7 +131,6 @@ void printQr(const QrCode &qr) {
     }
     printf("\n");
   }
-  printf("\n");
 }
 
 int main() {
@@ -106,13 +138,17 @@ int main() {
 
   SmartLock smart_lock(&event_queue);
 
+  generate_reset();
+
   char key[20];
   generate_private_key(key, sizeof(key));
-  printf("> Generated key is %s\n", key);
+  printf("> Generated key is %s (len: %d)\n", key, strlen(key));
 
   // TODO: generate base32 secret
+  printf("> Scan the following code using an authenticator app on your mobile "
+         "device\n");
   const QrCode qr0 = QrCode::encodeText(
-      "otpauth://totp/SmartLock?secret=JBSWY3DPEHPK3PXP", QrCode::Ecc::MEDIUM);
+      "otpauth://totp/SmartLock?secret=K2MGC5IIGCTGX277", QrCode::Ecc::MEDIUM);
   printQr(qr0);
 
   int status = connect_to_wifi(&wifi);

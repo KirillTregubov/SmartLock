@@ -23,9 +23,9 @@ void SmartLock::lock() {
 
   for (int i = 0; i < 2; i++) {
     _led1 = 1;
-    thread_sleep_for(200);
+    thread_sleep_for(300);
     _led1 = 0;
-    thread_sleep_for(100);
+    thread_sleep_for(150);
   }
 }
 
@@ -36,10 +36,10 @@ void SmartLock::unlock() {
   _led2 = 1;
   for (int i = 0; i < 2; i++) {
     _led1 = 1;
-    thread_sleep_for(200);
+    thread_sleep_for(300);
     _led1 = 0;
     if (i < 1) {
-      thread_sleep_for(100);
+      thread_sleep_for(150);
     }
   }
   _led2 = 0;
