@@ -8,6 +8,8 @@
  * @bug No known bugs.
  */
 #include "ble_service.hpp"
+#include "smartlock.hpp"
+#include "datastore.hpp"
 #include "ble_process.h"
 
 /**
@@ -68,13 +70,21 @@ void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
     }
     printf("> Received code %s\n\r", code);
 
+    char secret[20]; 
+    char log_message[50];
+    get_private_key(secret);
     if (_smart_lock->is_unlocked()) {
         printf("> SmartLock already unlocked\n");
     }
-    else if (validate("569861750830A66BEBFF", code)) {
+    else if (validate(secret, code)) {
+      printf(">Validated successfully!\n");
+      sprintf(log_message, "Received valid unlock code: %s", code);
+      write_log(log_message);
       _smart_lock->unlock();
     } else {
-      printf("> Code is incorrect\n");
+      printf("> Received incorrect code\n");
+      sprintf(log_message, "Received invalid unlock code: %s", code);
+      write_log(log_message);
     }
   }
 }

@@ -21,6 +21,8 @@
 
 // #include "totp.hpp"
 #include "wifi_service.hpp"
+#include <cstdint>
+#include <cstdio>
 
 using qrcodegen::QrCode;
 
@@ -133,6 +135,47 @@ void printQr(const QrCode &qr) {
   }
 }
 
+int hex_to_base32(const char* hex, int length, char *result, int bufSize) {
+  uint8_t* bytes = (uint8_t*) malloc(10);
+  int pos = 0;
+  for (int i = 0; i < 10; i++) {
+    sscanf(hex + pos, "%2hhx", &bytes[i]);
+    pos += 2;
+  }
+
+  length = length/2;
+
+  if (length < 0 || length > (1 << 28)) {
+    return -1;
+  }
+  int count = 0;
+  if (length > 0) {
+    int buffer = bytes[0];
+    int next = 1;
+    int bitsLeft = 8;
+    while (count < bufSize && (bitsLeft > 0 || next < length)) {
+      if (bitsLeft < 5) {
+        if (next < length) {
+          buffer <<= 8;
+          buffer |= bytes[next++] & 0xFF;
+          bitsLeft += 8;
+        } else {
+          int pad = 5 - bitsLeft;
+          buffer <<= pad;
+          bitsLeft += pad;
+        }
+      }
+      int index = 0x1F & (buffer >> (bitsLeft - 5));
+      bitsLeft -= 5;
+      result[count++] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"[index];
+    }
+  }
+  if (count < bufSize) {
+    result[count] = '\000';
+  }
+  return count;
+}
+
 int main() {
   printf("=== SmartLock booted ===\n");
 
@@ -140,15 +183,25 @@ int main() {
 
   generate_reset();
 
-  char key[20];
-  generate_private_key(key, sizeof(key));
+  printf("> Mounting file system\n");
+  mount_fs();
+  write_log("Device booted");
+  
+  const char *key = "AAAAAAAAAAAAAAAAAAAAA";
+  //generate_private_key(key, 20);
   printf("> Generated key is %s (len: %d)\n", key, strlen(key));
+  set_private_key(key);
 
-  // TODO: generate base32 secret
-  printf("> Scan the following code using an authenticator app on your mobile "
+  char base32key[20];
+  hex_to_base32(key, 20, base32key, 20);
+  
+  char qr_uri[50];
+  sprintf(qr_uri, "otpauth://totp/SmartLock?secret=%s", base32key);
+
+    printf("> Scan the following code using an authenticator app on your mobile "
          "device\n");
   const QrCode qr0 = QrCode::encodeText(
-      "otpauth://totp/SmartLock?secret=K2MGC5IIGCTGX277", QrCode::Ecc::MEDIUM);
+      qr_uri, QrCode::Ecc::MEDIUM);
   printQr(qr0);
 
   int status = connect_to_wifi(&wifi);
@@ -158,9 +211,6 @@ int main() {
     sync_rtc_with_ntp(&wifi);
   }
   wifi.disconnect();
-
-  printf("> Mounting file system\n");
-  mount_fs();
 
   printf("> Setting up log output\n");
   button1.fall(event_queue.event(print_logs));
