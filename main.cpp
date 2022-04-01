@@ -165,7 +165,7 @@ int main() {
   printf("> Setting up log output\n");
   button1.fall(event_queue.event(print_logs));
 
-  printf("> Starting BLE server\n");
+  printf("> Initializing BLE broadcast\n");
   init_bluetooth(event_queue, &smart_lock);
 
   printf("> Terminated\n");

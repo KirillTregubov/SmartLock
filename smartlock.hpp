@@ -37,6 +37,13 @@ public:
    */
   void unlock();
 
+  /**
+   * @brief Returns true if the SmartLock is unlocked.
+   *
+   * @return true if condition holds, false otherwise.
+   */
+  bool is_unlocked();
+
 private:
   lock_state_t _lock_state;
   EventQueue *_event_queue;

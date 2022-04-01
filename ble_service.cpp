@@ -68,7 +68,10 @@ void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
     }
     printf("> Received code %s\n\r", code);
 
-    if (validate("569861750830A66BEBFF", code)) {
+    if (_smart_lock->is_unlocked()) {
+        printf("> SmartLock already unlocked\n");
+    }
+    else if (validate("569861750830A66BEBFF", code)) {
       _smart_lock->unlock();
     } else {
       printf("> Code is incorrect\n");
