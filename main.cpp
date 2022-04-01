@@ -11,12 +11,15 @@
  *
  * @bug No known bugs.
  */
-
 #include "mbed.h"
-#include "smartlock.hpp"
+#include "ble_service.hpp"
 #include "datastore.hpp"
+#include "helpers.hpp"
 #include "qrcodegen.hpp"
-#include "totp.hpp"
+#include "rtc_service.hpp"
+#include "smartlock.hpp"
+// #include "totp.hpp"
+#include "wifi_service.hpp"
 
 using qrcodegen::QrCode;
 
@@ -25,7 +28,8 @@ using qrcodegen::QrCode;
 ISM43362Interface wifi(false);
 #endif
 
-static EventQueue event_queue(/* event count */ 10 * EVENTS_EVENT_SIZE);
+// static EventQueue event_queue(/* event count */ 10 * EVENTS_EVENT_SIZE);
+EventQueue event_queue;
 InterruptIn button1(BUTTON1);
 
 /**
@@ -100,6 +104,8 @@ void printQr(const QrCode &qr) {
 int main() {
   printf("=== SmartLock booted ===\n");
 
+  SmartLock smart_lock(&event_queue);
+
   char key[20];
   generate_private_key(key, sizeof(key));
   printf("> Generated key is %s\n", key);
@@ -122,8 +128,6 @@ int main() {
 
   printf("> Setting up log output\n");
   button1.fall(event_queue.event(print_logs));
-
-  SmartLock smart_lock(&event_queue);
 
   printf("> Starting BLE server\n");
   init_bluetooth(event_queue, &smart_lock);

@@ -1,15 +1,17 @@
 /**
- * @file smartlock_manager.cpp
- * @author Kirill Tregubov (KirillTregubov), Philip Cai (Gadnalf)
+ * @file smartlock.cpp
+ * @author Kirill Tregubov (KirillTregubov)
+ * @author Philip Cai (Gadnalf)
  * @copyright Copyright (c) 2022 Kirill Tregubov & Philip Cai
  *
- * @brief This module contains functions for operating a Smart Lock.
+ * @brief This module contains functionality for operating Smart Lock.
  * @bug No known bugs.
  */
 #include "smartlock.hpp"
 
 SmartLock::SmartLock(EventQueue *event_queue)
-    : _lock_state(SmartLock::LOCKED), _event_queue(event_queue), _out_pin(D7), _led1(LED1), _led2(LED2) {
+    : _lock_state(SmartLock::LOCKED), _event_queue(event_queue), _out_pin(D7),
+      _led1(LED1), _led2(LED2) {
   _out_pin = 0.0f;
 
   printf("> SmartLock initialized to LOCKED\n");

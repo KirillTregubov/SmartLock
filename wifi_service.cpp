@@ -1,12 +1,13 @@
 /**
  * @file wifi_service.cpp
- * @author Kirill Tregubov (KirillTregubov), Philip Cai (Gadnalf)
+ * @author Kirill Tregubov (KirillTregubov)
+ * @author Philip Cai (Gadnalf)
  * @copyright Copyright (c) 2022 Kirill Tregubov & Philip Cai
  *
- * @brief This module contains functions for connecting to the WiFi.
+ * @brief This module contains functionality for connecting to WiFi.
  * @bug No known bugs.
  */
-#include "smartlock.hpp"
+#include "wifi_service.hpp"
 #include "wifi_credentials.hpp"
 
 int connect_to_wifi(WiFiInterface *wifi) {

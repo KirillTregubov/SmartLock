@@ -1,12 +1,13 @@
 /**
  * @file rtc_service.cpp
- * @author Kirill Tregubov (KirillTregubov), Philip Cai (Gadnalf)
+ * @author Kirill Tregubov (KirillTregubov)
+ * @author Philip Cai (Gadnalf)
  * @copyright Copyright (c) 2022 Kirill Tregubov & Philip Cai
  *
  * @brief This module contains functions for syncing the RTC.
  * @bug No known bugs.
  */
-#include "smartlock.hpp"
+#include "rtc_service.hpp"
 
 void sync_rtc_with_factory() {
   set_time(1648016868);

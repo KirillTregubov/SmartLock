@@ -1,13 +1,13 @@
 /**
  * @file ble_service.cpp
- * @author Kirill Tregubov (KirillTregubov), Philip Cai (Gadnalf)
+ * @author Kirill Tregubov (KirillTregubov)
+ * @author Philip Cai (Gadnalf)
  * @copyright Copyright (c) 2022 Kirill Tregubov & Philip Cai
  *
- * @brief This module contains functions for using BLE.
+ * @brief This module contains functionality for initializing and using BLE.
  * @bug No known bugs.
  */
-#include "smartlock.hpp"
-// #include "gatt_server_process.h"
+#include "ble_service.hpp"
 #include "ble_process.h"
 
 /**
@@ -52,13 +52,7 @@ void BLEInputHandler::start(BLE &ble, events::EventQueue &event_queue) {
   GattService input_service(0xA001, characteristics, 1);
 
   ble.gattServer().addService(input_service);
-
   ble.gattServer().setEventHandler(this);
-
-  //   ble.gattClient().onDataWritten(&BLEInputHandler::onDataWritten);
-
-  printf("Service added with UUID 0xA000\r\n");
-  printf("Connect and write to characteristic 0xA001\r\n");
 }
 
 void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
@@ -72,13 +66,13 @@ void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
     for (int i = 0; i < params.len; i++) {
       index += sprintf(&code[index], "%02x", params.data[i]);
     }
-    printf("> Received code is %s\n\r", code);
+    printf("> Received code %s\n\r", code);
 
     if (validate("569861750830A66BEBFF", code)) {
       printf(">Validated successfully!\n");
       _smart_lock->unlock();
     } else {
-      printf("> Received incorrect code\n");
+      printf("> Code is incorrect\n");
     }
   }
 }
