@@ -18,11 +18,10 @@
 #include "qrcodegen.hpp"
 #include "rtc_service.hpp"
 #include "smartlock.hpp"
-
-// #include "totp.hpp"
 #include "wifi_service.hpp"
 #include <cstdint>
 #include <cstdio>
+
 
 using qrcodegen::QrCode;
 
@@ -70,11 +69,12 @@ int generate_private_key(char *buffer, int buffersize) {
     return NULL;
   }
 
-  char key[10] = {0};
+  char key[21] = {0};
   int index = 0;
   for (int i = 0; i < 10; i++) {
     index += sprintf(&key[index], "%02x", exported[i]);
   }
+  key[index] = '\0';
 
   psa_reset_key_attributes(&attributes);
   mbedtls_psa_crypto_free();
@@ -135,15 +135,15 @@ void printQr(const QrCode &qr) {
   }
 }
 
-int hex_to_base32(const char* hex, int length, char *result, int bufSize) {
-  uint8_t* bytes = (uint8_t*) malloc(10);
+int hex_to_base32(const char *hex, int length, char *result, int bufSize) {
+  uint8_t *bytes = (uint8_t *)malloc(10);
   int pos = 0;
   for (int i = 0; i < 10; i++) {
     sscanf(hex + pos, "%2hhx", &bytes[i]);
     pos += 2;
   }
 
-  length = length/2;
+  length = length / 2;
 
   if (length < 0 || length > (1 << 28)) {
     return -1;
@@ -186,22 +186,22 @@ int main() {
   printf("> Mounting file system\n");
   mount_fs();
   write_log("Device booted");
-  
-  const char *key = "AAAAAAAAAAAAAAAAAAAAA";
-  //generate_private_key(key, 20);
+
+  char key[20];
+  generate_private_key(key, 20);
   printf("> Generated key is %s (len: %d)\n", key, strlen(key));
   set_private_key(key);
 
   char base32key[20];
   hex_to_base32(key, 20, base32key, 20);
-  
-  char qr_uri[50];
-  sprintf(qr_uri, "otpauth://totp/SmartLock?secret=%s", base32key);
 
-    printf("> Scan the following code using an authenticator app on your mobile "
+  char qr_uri[52];
+  sprintf(qr_uri, "otpauth://totp/SmartLock?secret=%s", base32key);
+  printf("%s\n", qr_uri);
+
+  printf("> Scan the following code using an authenticator app on your mobile "
          "device\n");
-  const QrCode qr0 = QrCode::encodeText(
-      qr_uri, QrCode::Ecc::MEDIUM);
+  const QrCode qr0 = QrCode::encodeText(qr_uri, QrCode::Ecc::MEDIUM);
   printQr(qr0);
 
   int status = connect_to_wifi(&wifi);

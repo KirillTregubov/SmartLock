@@ -14,7 +14,7 @@
 #include "ble/Gap.h"
 #include "mbed.h"
 #include <chrono>
-
+#include "datastore.hpp"
 #include "smartlock.hpp"
 #include "totp.hpp"
 
