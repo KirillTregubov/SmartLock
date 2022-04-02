@@ -187,7 +187,7 @@ int main() {
   mount_fs();
   write_log("Device booted");
   
-  const char *key = "AAAAAAAAAAAAAAAAAAAAA";
+  const char *key = "AAAAAAAAAAAAAAAAAAAA";
   //generate_private_key(key, 20);
   printf("> Generated key is %s (len: %d)\n", key, strlen(key));
   set_private_key(key);
