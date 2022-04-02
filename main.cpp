@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <cstdio>
 
-
 using qrcodegen::QrCode;
 
 #if defined(TARGET_DISCO_L475VG_IOT01A)
