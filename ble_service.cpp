@@ -61,14 +61,15 @@ void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
       printf("> Received code has incorrect length\n");
       return;
     }
-    char code[6];
+    char *code = (char *)malloc(7);
     int index = 0;
     for (int i = 0; i < params.len; i++) {
       index += sprintf(&code[index], "%02x", params.data[i]);
     }
-    printf("> Received code %s\n\r", code);
+    code[6] = '\0';
+    printf("> Received code %s\n", code);
 
-    char secret[20];
+    char secret[21];
     char log_message[50];
     get_private_key(secret);
     printf("%s\n", secret);

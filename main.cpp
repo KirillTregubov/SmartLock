@@ -186,7 +186,15 @@ int main() {
   mount_fs();
   write_log("Device booted");
 
-  char key[20];
+  int status = connect_to_wifi(&wifi);
+  if (status < 0) {
+    sync_rtc_with_factory();
+  } else {
+    sync_rtc_with_ntp(&wifi);
+  }
+  wifi.disconnect();
+
+  char key[21];
   generate_private_key(key, 20);
   printf("> Generated key is %s (len: %d)\n", key, strlen(key));
   set_private_key(key);
@@ -202,14 +210,6 @@ int main() {
          "device\n");
   const QrCode qr0 = QrCode::encodeText(qr_uri, QrCode::Ecc::MEDIUM);
   printQr(qr0);
-
-  int status = connect_to_wifi(&wifi);
-  if (status < 0) {
-    sync_rtc_with_factory();
-  } else {
-    sync_rtc_with_ntp(&wifi);
-  }
-  wifi.disconnect();
 
   printf("> Setting up log output\n");
   button1.fall(event_queue.event(print_logs));
