@@ -63,7 +63,7 @@ private:
  * @brief Initialize the bluetooth server and input handler.
  *
  * @param event_queue The global event queue.
- * @return 0 upon sucess, -1 on error / failure.
+ * @return 0 upon success, -1 on error / failure.
  */
 int init_bluetooth(events::EventQueue &event_queue, SmartLock *smart_lock);
 

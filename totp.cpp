@@ -9,7 +9,7 @@
  */
 #include "totp.hpp"
 
-// Just in case
+// does the hmac calculation
 int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest) {
   // H((secret xor ipad) + counter)
   uint8_t i_key[PSA_HASH_MAX_SIZE] = {0};
@@ -50,9 +50,8 @@ int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest) {
   return 0;
 }
 
-// Would use this but this inexplicably fails to compile with message: Undefined
-// symbol psa_mac_compute (referred from
-// BUILD/DISCO_L475VG_IOT01A/ARMC6/totp.o). int psa_HMAC(mbedtls_svc_key_id_t
+// Would use this but I already finished and debugged the other one so y'know whatever.
+//int psa_HMAC(mbedtls_svc_key_id_t
 // key_id, uint8_t *counter, uint8_t *digest){
 //     psa_status_t status;
 //     psa_algorithm_t alg = PSA_ALG_HMAC(PSA_ALG_SHA_1);
@@ -65,6 +64,7 @@ int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest) {
 //     return 0;
 // }
 
+// dynamic truncation
 int DT(uint8_t *hmac_result) {
   // take the lowest 4 bits of hmac
   uint8_t offset = hmac_result[19] & 0xf;

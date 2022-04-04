@@ -22,7 +22,13 @@
 #define SHA1_DIGEST_LENGTH 20
 #define SHA1_BLOCKSIZE 64
 
-// Returns 1 if valid, 0 otherwise.
+/**
+ * @brief Validates a single TOTP value for a given secret at the device's current RTC time +-30.
+ *
+ * @param secret_hex The private secret as a hex string.
+ * @param TOTP_string The input TOTP value as a string.
+ * @return 1 if valid, 0 otherwise.
+ */
 int validate(const char *secret_hex, const char *TOTP_string);
 
 #endif // TOTP_H
