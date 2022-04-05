@@ -123,7 +123,8 @@ int generate_private_key() {
 void generate_recovery() {
   char secret[RECOVERY_KEY_LENGTH + 1];
   int get_success = get_recovery_keys(secret);
-  if (get_success != -1) {
+  if (get_success != -1 &&
+      strcmp(secret, "000000000000000000000000000000000000") != 0) {
     printf("> Using stored recovery keys\n");
     write_log("Using stored recovery keys");
     return;
@@ -225,7 +226,7 @@ int main() {
 
   printf("> Mounting file system\n");
   mount_fs();
-  write_log("Device booted");
+  write_log("+ Device booted");
 
   generate_recovery();
   char recovery[37];

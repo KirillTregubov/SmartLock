@@ -10,8 +10,8 @@
 #ifndef BLE_SERVICE_H
 #define BLE_SERVICE_H
 
-#include "ble/BLE.h"
-#include "ble/Gap.h"
+#include "BLE.h"
+#include "Gap.h"
 #include "datastore.hpp"
 #include "keys.hpp"
 #include "mbed.h"
@@ -21,44 +21,8 @@
 
 using namespace std::chrono_literals;
 
-/**
- * @brief A handler for the BLE input event.
- */
-class BLEInputHandler : private mbed::NonCopyable<BLEInputHandler>,
-                        public ble::GattServer::EventHandler {
-public:
-  /**
-   * @brief Construct a new BLE input handler object.
-   *
-   * @return Instance of BLEInputHandler.
-   */
-  BLEInputHandler(SmartLock *smart_lock);
-
-  /**
-   * @brief Called when the device starts advertising itself to others.
-   *
-   * @param ble The BLE singleton.
-   * @param event_queue The global event queue.
-   * @return Void.
-   */
-  void start(BLE &ble, events::EventQueue &event_queue);
-
-private:
-  /**
-   * @brief The GATT Characteristic that communicates the input.
-   */
-  WriteOnlyArrayGattCharacteristic<uint8_t, 6> *_input_characteristic;
-  SmartLock *_smart_lock;
-
-  /**
-   * This callback doesn't do anything right now except print whatever is
-   * written.
-   *
-   * @param params Information about the characterisitc being updated.
-   * @return Void.
-   */
-  void onDataWritten(const GattWriteCallbackParams &params) override;
-};
+const char DEVICE_NAME[10] = "SmartLock";
+static const uint16_t MAX_ADVERTISING_PAYLOAD_SIZE = 50;
 
 /**
  * @brief Initialize the bluetooth server and input handler.

@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 // Target board has QSPI Flash
 #if !(COMPONENT_QSPIF)
 #error[ERROR] Storage unavailable.
