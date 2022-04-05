@@ -44,3 +44,6 @@ A QR code is generated and displayed on every device boot which can be scanned i
 
 ## Troubleshooting Tips
 If you are seeing issues with mbedtls_sha1, navigate to mbed-os/connectivity/mbedtls/include/mbedtls/config.h, and uncomment the macro #define MBEDTLS_SHA1_C
+
+### Note
+The board RTC time and your authenticator device must be synchronized to the current NTP time for validation to function. Verify that your device and the board RTC time have been synchronized before attempting unlock
