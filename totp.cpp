@@ -50,21 +50,9 @@ int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest) {
   return 0;
 }
 
-// Would use this but I already finished and debugged the other one so y'know whatever.
-//int psa_HMAC(mbedtls_svc_key_id_t
-// key_id, uint8_t *counter, uint8_t *digest){
-//     psa_status_t status;
-//     psa_algorithm_t alg = PSA_ALG_HMAC(PSA_ALG_SHA_1);
-//     size_t actual_hash_len;
-//     status = psa_mac_compute(key_id, alg, counter, 8, digest,
-//     SHA1_DIGEST_LENGTH, &actual_hash_len); if (status != PSA_SUCCESS) {
-//         printf("Failed to compute HMAC\n");
-//         return -1;
-//     }
-//     return 0;
-// }
-
-// dynamic truncation
+/**
+ * @brief dynamic truncation
+ */
 int DT(uint8_t *hmac_result) {
   // take the lowest 4 bits of hmac
   uint8_t offset = hmac_result[19] & 0xf;
@@ -100,7 +88,7 @@ int validate_for_time(const char *secret_hex, const char *TOTP_string,
   manual_HMAC(secret_bytes, counter_bytes, hmac_out);
   int TOTP = DT(hmac_out) % 1000000;
   int TOTP_input = atoi(TOTP_string);
-  printf("Calculated TOTP Value: %6d\n", TOTP);
+//   printf("Calculated TOTP Value: %6d\n", TOTP);
 
   return TOTP == TOTP_input;
 }

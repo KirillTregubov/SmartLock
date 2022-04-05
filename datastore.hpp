@@ -11,23 +11,22 @@
 #ifndef DATASTORE_H
 #define DATASTORE_H
 
-// Target board has QSPI Flash
-#if !(COMPONENT_QSPIF)
-#error[ERROR] Storage unavailable.
-#endif
-
-#include "LittleFileSystem.h"
 #include "mbed.h"
+#include "LittleFileSystem.h"
+#include "keys.hpp"
 #include <errno.h>
 #include <functional>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define PRIVATE_KEY_LENGTH 20
+// Target board has QSPI Flash
+#if !(COMPONENT_QSPIF)
+#error[ERROR] Storage unavailable.
+#endif
+
 #define PRIVATE_KEY_PATH "/fs/private_key.txt"
-#define RESET_KEY_LENGTH 20
-#define RESET_KEY_PATH "/fs/reset_key.txt"
+#define RECOVERY_KEY_PATH "/fs/recovery_key.txt"
 #define LOGS_PATH "/fs/logs.txt"
 #define BUFFER_MAX_LEN 10
 
@@ -38,6 +37,12 @@
 int mount_fs();
 
 /**
+ * @brief Erases the file system.
+ * @return 0 upon success, -1 on error / failure.
+ */
+void erase_fs();
+
+/**
  * @brief Get the private key from memory.
  *
  * @param buf Buffer to store the private key.
@@ -46,12 +51,12 @@ int mount_fs();
 int get_private_key(char *buf);
 
 /**
- * @brief Get the reset key from memory.
+ * @brief Get the reset keys from memory.
  *
  * @param buf Buffer to store the reset key.
  * @return 0 upon success, -1 on error / failure.
  */
-int get_reset_key(char *buf);
+int get_recovery_keys(char *buf);
 
 /**
  * @brief Sets the private key in memory.
@@ -62,12 +67,12 @@ int get_reset_key(char *buf);
 int set_private_key(const char *key);
 
 /**
- * @brief Sets the reset key in memory.
+ * @brief Sets the reset keys in memory.
  *
  * @param key The key string to write.
  * @return 0 upon success, -1 on error / failure.
  */
-int set_reset_key(const char *key);
+int set_recovery_keys(const char *key);
 
 /**
  * @brief Writes a timestamped log to the log file.

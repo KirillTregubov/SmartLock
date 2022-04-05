@@ -13,10 +13,11 @@
 #include "ble/BLE.h"
 #include "ble/Gap.h"
 #include "mbed.h"
-#include <chrono>
 #include "datastore.hpp"
+#include "keys.hpp"
 #include "smartlock.hpp"
 #include "totp.hpp"
+#include <chrono>
 
 using namespace std::chrono_literals;
 
@@ -46,7 +47,7 @@ private:
   /**
    * @brief The GATT Characteristic that communicates the input.
    */
-  WriteOnlyArrayGattCharacteristic<uint8_t, 3> *_input_characteristic;
+  WriteOnlyArrayGattCharacteristic<uint8_t, 6> *_input_characteristic;
   SmartLock *_smart_lock;
 
   /**

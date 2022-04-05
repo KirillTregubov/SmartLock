@@ -15,39 +15,71 @@
 #include "datastore.hpp"
 #include "helpers.hpp"
 #include "mbed.h"
+#include "keys.hpp"
 #include "qrcodegen.hpp"
 #include "rtc_service.hpp"
 #include "smartlock.hpp"
 #include "wifi_service.hpp"
 #include <cstdint>
 #include <cstdio>
-
-using qrcodegen::QrCode;
+#include <chrono>
 
 #if defined(TARGET_DISCO_L475VG_IOT01A)
 #include "ISM43362Interface.h"
 ISM43362Interface wifi(false);
 #endif
 
-// static EventQueue event_queue(/* event count */ 10 * EVENTS_EVENT_SIZE);
+using namespace std::chrono;
+using qrcodegen::QrCode;
+
 EventQueue event_queue;
 InterruptIn button1(BUTTON1);
+Timer t;
+
+void button_fall_handler() {
+  event_queue.call(print_logs);
+  t.reset();
+  t.start();
+}
+
+void reset_system() {
+  printf("> Resetting lock");
+  erase_fs();
+  fflush(stdout);
+  NVIC_SystemReset();
+}
+
+void button_rise_handler() {
+  t.stop();
+  if (duration_cast<milliseconds>(t.elapsed_time()).count() > 5000) {
+    event_queue.call(reset_system);
+  }
+}
 
 /**
  * @brief Generate a private key using onboard TRNG chip.
  *
- * @return The address of the generated key.
+ * @return 0 on success, -1 on failure/error
  */
-int generate_private_key(char *buffer, int buffersize) {
-  psa_status_t status;
-  status = psa_crypto_init();
+int generate_private_key() {
+  char secret[PRIVATE_KEY_LENGTH + 1];
+  int get_success = get_private_key(secret);
+  if (get_success != -1) {
+    printf("> Using stored private key\n");
+    write_log("Using stored private key");
+    return 0;
+  }
+
+  fflush(stdout);
+
+  psa_status_t status = psa_crypto_init();
   if (status != PSA_SUCCESS) {
     printf("Failed to initialize PSA Crypto\n");
-    return NULL;
+    return -1;
   }
 
   size_t exported_length = 0;
-  static uint8_t exported[10];
+  static uint8_t exported[PRIVATE_KEY_LENGTH / 2];
   psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
   psa_key_id_t id;
   psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_EXPORT);
@@ -59,60 +91,72 @@ int generate_private_key(char *buffer, int buffersize) {
   status = psa_generate_key(&attributes, &id);
   if (status != PSA_SUCCESS) {
     printf("Failed to generate key (%d)\n", status);
-    return NULL;
+    return -1;
   }
 
   status = psa_export_key(id, exported, sizeof(exported), &exported_length);
   if (status != PSA_SUCCESS || exported_length != 10) {
     printf("Failed to export key (%d)\n", status);
-    return NULL;
+    return -1;
   }
-
-  char key[21] = {0};
-  int index = 0;
-  for (int i = 0; i < 10; i++) {
-    index += sprintf(&key[index], "%02x", exported[i]);
-  }
-  key[index] = '\0';
 
   psa_reset_key_attributes(&attributes);
   mbedtls_psa_crypto_free();
 
-  strncpy(buffer, strupr(key), buffersize);
+  char key[PRIVATE_KEY_LENGTH + 1];
+  int index = 0;
+  for (int i = 0; i < exported_length; i++) {
+    index += sprintf(&key[index], "%02x", exported[i]);
+  }
+  key[index] = '\0';
+
+  printf("> Generated new private key\n");
+  write_log("Generated new private key");
+  set_private_key(strupr(key));
   return 0;
 }
 
-void generate_reset() {
-  psa_status_t status;
-  uint8_t random[36] = {0};
+/**
+ * @brief Generate 6 recovery keys using onboard TRNG chip.
+ *
+ * @return Void.
+ */
+void generate_recovery() {
+  char secret[RECOVERY_KEY_LENGTH + 1];
+  int get_success = get_recovery_keys(secret);
+  if (get_success != -1) {
+    printf("> Using stored recovery keys\n");
+    write_log("Using stored recovery keys");
+    return;
+  }
 
   fflush(stdout);
 
-  status = psa_crypto_init();
+  psa_status_t status = psa_crypto_init();
   if (status != PSA_SUCCESS) {
     printf("Failed to initialize PSA Crypto\n");
     return;
   }
 
+  uint8_t random[36] = {0};
   status = psa_generate_random(random, sizeof(random));
   if (status != PSA_SUCCESS) {
     printf("Failed to generate a random value (%" PRIu32 ")\n", status);
     return;
   }
 
-  char keys[6][7];
-  for (int i = 0; i < 36; i++) {
-    keys[i / 6][i % 6] = 'A' + (random[i] % 26);
-  }
-
-  printf("> Generated recovery keys\n");
-
-  for (int i = 0; i < 6; i++) {
-    keys[i][6] = '\0';
-    printf("%s\n", keys[i]);
-  }
-
   mbedtls_psa_crypto_free();
+
+  char keys[RECOVERY_KEY_LENGTH + 1];
+  int index = 0;
+  for (index = 0; index < RECOVERY_KEY_LENGTH; index++) {
+    keys[index] = 'A' + (random[index] % 26);
+  }
+  keys[index] = '\0';
+
+  printf("> Generated new recovery keys\n");
+  write_log("Generated new recovery keys");
+  set_recovery_keys(keys);
 }
 
 /**
@@ -180,11 +224,35 @@ int main() {
 
   SmartLock smart_lock(&event_queue);
 
-  generate_reset();
-
   printf("> Mounting file system\n");
   mount_fs();
   write_log("Device booted");
+
+  generate_recovery();
+  char recovery[37];
+  get_recovery_keys(recovery);
+  printf("> Recovery keys:\n");
+  for (int i = 0; i < sizeof(recovery); i++) {
+    printf("%c", recovery[i]);
+    if (i % 6 == 5) {
+      printf("\n");
+    }
+  }
+
+  char key[21];
+  generate_private_key();
+  get_private_key(key);
+  printf("> Stored key is %s (len: %d)\n", key, strlen(key));
+
+  char base32key[20];
+  hex_to_base32(key, 20, base32key, 20);
+
+  char qr_uri[52];
+  sprintf(qr_uri, "otpauth://totp/SmartLock?secret=%s", base32key);
+  printf("> Scan the following code using an authenticator app on your mobile "
+         "device\n");
+  const QrCode qr0 = QrCode::encodeText(qr_uri, QrCode::Ecc::MEDIUM);
+  printQr(qr0);
 
   int status = connect_to_wifi(&wifi);
   if (status < 0) {
@@ -194,25 +262,9 @@ int main() {
   }
   wifi.disconnect();
 
-  char key[21];
-  generate_private_key(key, 20);
-  printf("> Generated key is %s (len: %d)\n", key, strlen(key));
-  set_private_key(key);
-
-  char base32key[20];
-  hex_to_base32(key, 20, base32key, 20);
-
-  char qr_uri[52];
-  sprintf(qr_uri, "otpauth://totp/SmartLock?secret=%s", base32key);
-  printf("%s\n", qr_uri);
-
-  printf("> Scan the following code using an authenticator app on your mobile "
-         "device\n");
-  const QrCode qr0 = QrCode::encodeText(qr_uri, QrCode::Ecc::MEDIUM);
-  printQr(qr0);
-
   printf("> Setting up log output\n");
-  button1.fall(event_queue.event(print_logs));
+  button1.fall(&button_fall_handler);
+  button1.rise(&button_rise_handler);
 
   printf("> Initializing BLE broadcast\n");
   init_bluetooth(event_queue, &smart_lock);

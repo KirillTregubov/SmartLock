@@ -25,7 +25,7 @@ public:
 };
 
 BLEInputHandler::BLEInputHandler(SmartLock *smart_lock) {
-  uint8_t inputValue[3];
+  uint8_t inputValue[6];
   _input_characteristic =
       new WriteOnlyArrayGattCharacteristic<uint8_t, sizeof(inputValue)>(
           0xA000, inputValue);
@@ -55,34 +55,87 @@ void BLEInputHandler::start(BLE &ble, events::EventQueue &event_queue) {
   ble.gattServer().setEventHandler(this);
 }
 
+int digits_only(const char *s) {
+  while (*s) {
+    if (isdigit(*s++) == 0)
+      return 0;
+  }
+
+  return 1;
+}
+
 void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
   if (params.handle == _input_characteristic->getValueHandle()) {
-    if (params.len != 3) {
+    if (params.len != 3 and params.len != 6) {
       printf("> Received code has incorrect length\n");
       return;
     }
+
     char *code = (char *)malloc(7);
-    int index = 0;
-    for (int i = 0; i < params.len; i++) {
-      index += sprintf(&code[index], "%02x", params.data[i]);
+    if (params.len == 6) {
+      int index = 0;
+      for (int i = 0; i < params.len; i++) {
+        index += sprintf(&code[index], "%c", params.data[i]);
+      }
+      code[6] = '\0';
+    } else if (params.len == 3) {
+      int index = 0;
+      for (int i = 0; i < params.len; i++) {
+        index += sprintf(&code[index], "%02x", params.data[i]);
+      }
+      code[6] = '\0';
     }
-    code[6] = '\0';
+
     printf("> Received code %s\n", code);
 
-    char secret[21];
-    char log_message[50];
-    get_private_key(secret);
-    printf("%s\n", secret);
     if (_smart_lock->is_unlocked()) {
       printf("> SmartLock already unlocked\n");
-    } else if (validate(secret, code)) {
-      printf(">Validated successfully!\n");
-      sprintf(log_message, "Received valid unlock code: %s", code);
-      write_log(log_message);
-      _smart_lock->unlock();
+      return;
+    }
+
+    char log_message[50];
+    if (digits_only(code)) {
+      char secret[PRIVATE_KEY_LENGTH + 1];
+      get_private_key(secret);
+      //   printf("%s\n", secret);
+
+      if (validate(secret, code)) {
+        printf("> Validated successfully!\n");
+        sprintf(log_message, "Received valid TOTP code: %s", code);
+        write_log(log_message);
+        _smart_lock->unlock();
+      } else {
+        printf("> Received incorrect code\n");
+        sprintf(log_message, "Received invalid TOTP code: %s", code);
+        write_log(log_message);
+      }
     } else {
+      char secret[RECOVERY_KEY_LENGTH + 1];
+      get_recovery_keys(secret);
+      // printf("%s\n", secret);
+
+      char recovery_key[7];
+      for (int key = 0; key < RECOVERY_KEY_LENGTH; key += 6) {
+        strncpy(recovery_key, secret + key, 6);
+        recovery_key[6] = '\0';
+        printf("%s\n", recovery_key);
+        if (strcmp(recovery_key, code) == 0) {
+          printf("> Validated successfully!\n");
+          sprintf(log_message, "Received valid recovery code: %s", code);
+          write_log(log_message);
+          _smart_lock->unlock();
+
+          // remove recovery code
+          //   printf("%s\n", secret);
+          //   strncpy(secret + key, "000000", 6);
+          //   printf("%s\n", secret);
+          set_recovery_keys(secret);
+          return;
+        }
+      }
+
       printf("> Received incorrect code\n");
-      sprintf(log_message, "Received invalid unlock code: %s", code);
+      sprintf(log_message, "Received invalid recovery code: %s", code);
       write_log(log_message);
     }
   }

@@ -10,6 +10,7 @@
 #ifndef RTC_SERVICE_H
 #define RTC_SERVICE_H
 
+#include "mbed.h"
 #include "ntp-client/NTPClient.h"
 
 /**

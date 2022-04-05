@@ -14,7 +14,7 @@
 BlockDevice *bd = BlockDevice::get_default_instance();
 LittleFileSystem fs("fs");
 
-void erase() {
+void erase_fs() {
   printf("Initializing the block device... ");
   fflush(stdout);
   int err = bd->init();
@@ -34,7 +34,7 @@ void erase() {
   printf("Deinitializing the block device... ");
   fflush(stdout);
   err = bd->deinit();
-  printf("%s\n", (err ? "Failed on deinit" : "OK"));
+  printf("%s\n", (err ? "Failed on deinit\n" : "OK\n"));
   if (err) {
     error("error: %s (%d)\n", strerror(-err), err);
   }
@@ -64,19 +64,19 @@ int get_private_key(char *buf) {
     fclose(f);
     return 0;
   }
-  printf("Cannot open file for read %s: %s\n", PRIVATE_KEY_PATH,
-         strerror(errno));
+//   printf("Cannot open file for read %s: %s\n", PRIVATE_KEY_PATH,
+//          strerror(errno));
   return -1;
 }
 
-int get_reset_key(char *buf) {
-  FILE *f = fopen(RESET_KEY_PATH, "r");
+int get_recovery_keys(char *buf) {
+  FILE *f = fopen(RECOVERY_KEY_PATH, "r");
   if (f) {
-    fgets(buf, RESET_KEY_LENGTH + 1, f);
+    fgets(buf, RECOVERY_KEY_LENGTH + 1, f);
     fclose(f);
     return 0;
   }
-  printf("Cannot open file for read %s: %s\n", RESET_KEY_PATH, strerror(errno));
+//   printf("Cannot open file for read %s: %s\n", RECOVERY_KEY_PATH, strerror(errno));
   return -1;
 }
 
@@ -92,15 +92,15 @@ int set_private_key(const char *key) {
   return -1;
 }
 
-int set_reset_key(const char *key) {
-  FILE *f = fopen(RESET_KEY_PATH, "w");
+int set_recovery_keys(const char *key) {
+  FILE *f = fopen(RECOVERY_KEY_PATH, "w");
   if (f) {
-    fprintf(f, "%*s", RESET_KEY_LENGTH + 1, key);
+    fprintf(f, "%*s", RECOVERY_KEY_LENGTH + 1, key);
     fclose(f);
     return 0;
   }
-  printf("Cannot open file for write %s: %s\n", RESET_KEY_PATH,
-         strerror(errno));
+//   printf("Cannot open file for write %s: %s\n", RECOVERY_KEY_PATH,
+//          strerror(errno));
   return -1;
 }
 
