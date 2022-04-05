@@ -24,7 +24,7 @@ The private key and six recovery keys are generated on first boot and stored on 
 
 A QR code is generated and displayed on every device boot which can be scanned into an authenticator app using a mobile device to generate the time-based one-time passwords.
 
-Usage:
+## Usage
 1. Scan QR code using an authenticator application on a mobile device
 2. Retrieve time-based one-time password from authenticator (TOTP).
 3. Connect to 'SmartLock' using Bluetooth.
