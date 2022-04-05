@@ -64,8 +64,6 @@ int get_private_key(char *buf) {
     fclose(f);
     return 0;
   }
-//   printf("Cannot open file for read %s: %s\n", PRIVATE_KEY_PATH,
-//          strerror(errno));
   return -1;
 }
 
@@ -76,7 +74,6 @@ int get_recovery_keys(char *buf) {
     fclose(f);
     return 0;
   }
-//   printf("Cannot open file for read %s: %s\n", RECOVERY_KEY_PATH, strerror(errno));
   return -1;
 }
 
@@ -99,8 +96,8 @@ int set_recovery_keys(const char *key) {
     fclose(f);
     return 0;
   }
-//   printf("Cannot open file for write %s: %s\n", RECOVERY_KEY_PATH,
-//          strerror(errno));
+  printf("Cannot open file for write %s: %s\n", RECOVERY_KEY_PATH,
+         strerror(errno));
   return -1;
 }
 
@@ -124,10 +121,12 @@ int print_logs() {
   FILE *f = fopen(LOGS_PATH, "r");
   int c;
   if (f) {
+    printf("=== Device Log ===\n");
     while ((c = getc(f)) != EOF) {
       putchar(c);
     }
     fclose(f);
+    printf("=== Log Ends ===\n");
     return 0;
   }
   printf("Cannot open file for read %s: %s\n", LOGS_PATH, strerror(errno));

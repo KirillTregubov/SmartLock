@@ -11,6 +11,7 @@
 #define WIFI_SERVICE_H
 
 #include "mbed.h"
+#include "wifi_credentials.hpp"
 
 /**
  * @brief Connect to the WiFi network specified in 'mbed_app.json'.

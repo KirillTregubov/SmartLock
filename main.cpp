@@ -14,15 +14,15 @@
 #include "ble_service.hpp"
 #include "datastore.hpp"
 #include "helpers.hpp"
-#include "mbed.h"
 #include "keys.hpp"
+#include "mbed.h"
 #include "qrcodegen.hpp"
 #include "rtc_service.hpp"
 #include "smartlock.hpp"
 #include "wifi_service.hpp"
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
-#include <chrono>
 
 #if defined(TARGET_DISCO_L475VG_IOT01A)
 #include "ISM43362Interface.h"
@@ -43,9 +43,8 @@ void button_fall_handler() {
 }
 
 void reset_system() {
-  printf("> Resetting lock");
+  printf("> Resetting Smart Lock\n");
   erase_fs();
-  fflush(stdout);
   NVIC_SystemReset();
 }
 
@@ -233,16 +232,17 @@ int main() {
   get_recovery_keys(recovery);
   printf("> Recovery keys:\n");
   for (int i = 0; i < sizeof(recovery); i++) {
-    printf("%c", recovery[i]);
-    if (i % 6 == 5) {
-      printf("\n");
+    if (recovery[i] != '0') {
+      printf("%c", recovery[i]);
+      if (i % 6 == 5) {
+        printf("\n");
+      }
     }
   }
 
-  char key[21];
   generate_private_key();
+  char key[21];
   get_private_key(key);
-  printf("> Stored key is %s (len: %d)\n", key, strlen(key));
 
   char base32key[20];
   hex_to_base32(key, 20, base32key, 20);

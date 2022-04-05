@@ -47,9 +47,7 @@ void SmartLock::unlock() {
   _event_queue->call_in(7500ms, this, &SmartLock::lock);
 }
 
-bool SmartLock::is_unlocked() {
-    return _lock_state == SmartLock::UNLOCKED;
-}
+bool SmartLock::is_unlocked() { return _lock_state == SmartLock::UNLOCKED; }
 
 void SmartLock::_update_state(lock_state_t new_state) {
   _lock_state = new_state;

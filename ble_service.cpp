@@ -97,39 +97,34 @@ void BLEInputHandler::onDataWritten(const GattWriteCallbackParams &params) {
     if (digits_only(code)) {
       char secret[PRIVATE_KEY_LENGTH + 1];
       get_private_key(secret);
-      //   printf("%s\n", secret);
 
       if (validate(secret, code)) {
-        printf("> Validated successfully!\n");
         sprintf(log_message, "Received valid TOTP code: %s", code);
         write_log(log_message);
         _smart_lock->unlock();
       } else {
-        printf("> Received incorrect code\n");
+        printf("> Received code is incorrect\n");
         sprintf(log_message, "Received invalid TOTP code: %s", code);
         write_log(log_message);
       }
     } else {
       char secret[RECOVERY_KEY_LENGTH + 1];
       get_recovery_keys(secret);
-      // printf("%s\n", secret);
 
       char recovery_key[7];
       for (int key = 0; key < RECOVERY_KEY_LENGTH; key += 6) {
         strncpy(recovery_key, secret + key, 6);
         recovery_key[6] = '\0';
-        printf("%s\n", recovery_key);
+
         if (strcmp(recovery_key, code) == 0) {
           printf("> Validated successfully!\n");
           sprintf(log_message, "Received valid recovery code: %s", code);
           write_log(log_message);
           _smart_lock->unlock();
 
-          // remove recovery code
-          //   printf("%s\n", secret);
-          //   strncpy(secret + key, "000000", 6);
-          //   printf("%s\n", secret);
+          strncpy(secret + key, "000000", 6);
           set_recovery_keys(secret);
+          sprintf(log_message, "Removed recovery code: %s", code);
           return;
         }
       }

@@ -12,9 +12,9 @@
 
 #include "ble/BLE.h"
 #include "ble/Gap.h"
-#include "mbed.h"
 #include "datastore.hpp"
 #include "keys.hpp"
+#include "mbed.h"
 #include "smartlock.hpp"
 #include "totp.hpp"
 #include <chrono>

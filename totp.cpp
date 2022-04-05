@@ -9,7 +9,9 @@
  */
 #include "totp.hpp"
 
-// does the hmac calculation
+/**
+ * @brief does the hmac calculation
+ */
 int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest) {
   // H((secret xor ipad) + counter)
   uint8_t i_key[PSA_HASH_MAX_SIZE] = {0};
@@ -23,7 +25,6 @@ int manual_HMAC(uint8_t *secret, uint8_t *counter, uint8_t *digest) {
   uint8_t i_sha[SHA1_DIGEST_LENGTH];
 
   /* Compute hash of inner message  */
-
   mbedtls_sha1_context *ctx =
       (mbedtls_sha1_context *)malloc(sizeof(mbedtls_sha1_context));
 
@@ -88,7 +89,6 @@ int validate_for_time(const char *secret_hex, const char *TOTP_string,
   manual_HMAC(secret_bytes, counter_bytes, hmac_out);
   int TOTP = DT(hmac_out) % 1000000;
   int TOTP_input = atoi(TOTP_string);
-//   printf("Calculated TOTP Value: %6d\n", TOTP);
 
   return TOTP == TOTP_input;
 }

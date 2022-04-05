@@ -24,14 +24,14 @@ void sync_rtc_with_ntp(NetworkInterface *wifi) {
     ntp.set_server("1.pool.ntp.org", 123);
 
     time_t new_timestamp = ntp.get_timestamp();
-    if ((int) timestamp < 0 || timestamp == new_timestamp || timestamp + 1 == new_timestamp) {
-        timestamp = new_timestamp;
+    if ((int)timestamp < 0 || timestamp == new_timestamp ||
+        timestamp + 1 == new_timestamp) {
+      timestamp = new_timestamp;
     }
   }
 
-  if ((int) timestamp < 0) {
-    printf("An error occurred when getting the time. (code %u)\n",
-           timestamp);
+  if ((int)timestamp < 0) {
+    printf("An error occurred when getting the time. (code %u)\n", timestamp);
     sync_rtc_with_factory();
   } else {
     printf("> Synced RTC to %s", ctime(&timestamp));

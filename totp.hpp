@@ -23,7 +23,8 @@
 #define SHA1_BLOCKSIZE 64
 
 /**
- * @brief Validates a single TOTP value for a given secret at the device's current RTC time +-30.
+ * @brief Validates a single TOTP value for a given secret at the device's
+ * current RTC time +-30.
  *
  * @param secret_hex The private secret as a hex string.
  * @param TOTP_string The input TOTP value as a string.

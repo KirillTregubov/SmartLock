@@ -8,7 +8,6 @@
  * @bug No known bugs.
  */
 #include "wifi_service.hpp"
-#include "wifi_credentials.hpp"
 
 int connect_to_wifi(WiFiInterface *wifi) {
   WiFiAccessPoint *ap;
