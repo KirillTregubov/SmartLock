@@ -1,6 +1,6 @@
 # SmartLock
 
-Made by Kirill Tregubov and Philip Cai.
+Made by [Kirill Tregubov](https://github.com/KirillTregubov) and [Philip Cai](https://github.com/Gadnalf).
 
 ## Getting Started
 
@@ -18,29 +18,32 @@ Before building the project, it is important that you edit `wifi_credentials.hpp
 
 ## Functionality
 
-The devices manages a lock assigned to pin D7. To unlock, a valid time-based one-time password or a recovery key must be transmitted to the device over Bluetooth.
+The devices manages a lock assigned to pin D7. To unlock, a valid time-based one-time password (TOTP) or a recovery key must be transmitted to the device over Bluetooth.
 
 The private key and six recovery keys are generated on first boot and stored on the device. They are retreived from storage on subsequent system boots.
 
 A QR code is generated and displayed on every device boot which can be scanned into an authenticator app using a mobile device to generate the time-based one-time passwords.
 
 ## Usage
-1. Scan QR code using an authenticator application on a mobile device
-2. Retrieve time-based one-time password from authenticator (TOTP).
+1. Scan QR code using an authenticator application on a mobile device.
+2. Retrieve TOTP from authenticator.
 3. Connect to 'SmartLock' using Bluetooth.
 4. Write TOTP as a byte array or a UTF string to the writeable characteristic.
-5. Alternatively, you can write one of the 6 recovery keys to the characteristic.
+5. Alternatively, you can write one of the 6 recovery keys once.
 
 ## Features
 
+- Press USER Button to Display Device Logs
+- Hold USER Button for 5 Seconds to Reset Lock (resets to locked)
 - Wireless Network RTC Synchronization
-  - If provided network credentials, the device will automatically attempt to sync device time to that specified by a public NTP Server.
+  - If provided network credentials, the device will automatically attempt to sync device time to 4 different public NTP servers.
 - Bluetooth Connectivity and Communication
-- Press USER button to display device logs
-- Hold USER button for 5 seconds to reset device
-- Time-based One-time Password Validation
-- One-time Recovery Key Matching
+- Device Key and Log Storage
+- TOTP Submission and Validation
+- One-time Recovery Key Usage
 - QR code Generation and Display
+- LEDs have Unique Blink Pattern on both Lock and Unlock
+- Pin D7 has Rising Edge for Duration of Unlock
 
 ## Troubleshooting Tips
 If you are seeing issues with mbedtls_sha1, navigate to `mbed-os/connectivity/mbedtls/include/mbedtls/config.h`, and uncomment the macro `#define MBEDTLS_SHA1_C`.
